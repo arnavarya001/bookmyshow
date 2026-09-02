@@ -149,7 +149,17 @@ app.all("{*path}", (req, res, next) => {
 app.use((err, req, res, next) => {
   if (res.headersSent) return next(err);
   const { statusCode = 500, message = "Something went wrong!" } = err;
-  return res.status(statusCode).render("error", { message });
+  try {
+    return res.status(statusCode).render("error", { message });
+  } catch (renderErr) {
+    return res.status(statusCode).send(`
+      <div style="font-family: sans-serif; padding: 40px; background: #0c0e12; color: #fff; min-height: 100vh;">
+        <h1 style="color: #F84464;">Error ${statusCode}</h1>
+        <p>${message}</p>
+        <a href="/movies" style="color: #F84464;">Return to Home</a>
+      </div>
+    `);
+  }
 });
 
 // Start Server

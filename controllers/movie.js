@@ -17,20 +17,32 @@ module.exports.index = async (req, res, next) => {
     if (sort === "rating") sortQuery = { rating: -1 };
     if (sort === "popularity") sortQuery = { votesCount: -1 };
 
-    const movies = await Movie.find(filter).sort(sortQuery);
-    const trendingMovies = await Movie.find({ isTrending: true }).limit(5);
+    let movies = [];
+    let trendingMovies = [];
+    let allGenres = ["Action", "Sci-Fi", "Adventure", "Drama", "Animation"];
+    let allLanguages = ["English", "Hindi", "Tamil", "Telugu"];
 
-    // Get distinct genres and languages for filter pills
-    const allGenres = await Movie.distinct("genre");
-    const allLanguages = await Movie.distinct("language");
+    try {
+      movies = await Movie.find(filter).sort(sortQuery);
+      trendingMovies = await Movie.find({ isTrending: true }).limit(5);
+      allGenres = await Movie.distinct("genre");
+      allLanguages = await Movie.distinct("language");
+    } catch (dbErr) {
+      console.warn("Database query notice:", dbErr.message);
+      const { sampleMovies } = require("../init/data");
+      movies = sampleMovies.map((m, idx) => ({ ...m, _id: "preview_" + (idx + 1) }));
+      trendingMovies = movies.filter((m) => m.isTrending);
+    }
 
     // Check user watchlist
     let watchlistIds = [];
     if (req.user) {
-      const user = await User.findById(req.user._id);
-      if (user && user.watchlist) {
-        watchlistIds = user.watchlist.map((id) => id.toString());
-      }
+      try {
+        const user = await User.findById(req.user._id);
+        if (user && user.watchlist) {
+          watchlistIds = user.watchlist.map((id) => id.toString());
+        }
+      } catch (e) {}
     }
 
     return res.render("movies/index", {

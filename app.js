@@ -26,37 +26,43 @@ const userRouter = require("./routes/user");
 const fs = require("fs");
 
 // Database Connection with Serverless Caching
-const dbUrl = process.env.ATLASDB_URL || "mongodb://127.0.0.1:27017/bookmyshow";
+const isProd = process.env.NODE_ENV === "production" || process.env.VERCEL;
+const dbUrl = process.env.ATLASDB_URL || (!isProd ? "mongodb://127.0.0.1:27017/bookmyshow" : null);
 let cachedConnection = null;
 
 async function connectDB() {
+  if (!dbUrl) return null;
   if (cachedConnection && mongoose.connection.readyState >= 1) {
     return cachedConnection;
   }
   try {
     cachedConnection = await mongoose.connect(dbUrl, {
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 3000,
     });
     console.log("Connected to BookMyShow Database 🎬");
     return cachedConnection;
   } catch (err) {
-    console.warn("MongoDB connection warning:", err.message);
+    console.warn("MongoDB connection notice:", err.message);
   }
 }
-connectDB();
+if (dbUrl) {
+  connectDB();
+}
 
 // View Engine
-app.set("view engine", "ejs");
-const viewsPath = fs.existsSync(path.join(__dirname, "views"))
-  ? path.join(__dirname, "views")
-  : path.join(process.cwd(), "views");
-app.set("views", viewsPath);
 app.engine("ejs", ejsMate);
+app.set("view engine", "ejs");
+let viewsPath = path.join(__dirname, "views");
+if (!fs.existsSync(viewsPath)) {
+  viewsPath = path.join(process.cwd(), "views");
+}
+app.set("views", viewsPath);
 
 // Middleware
-const publicPath = fs.existsSync(path.join(__dirname, "public"))
-  ? path.join(__dirname, "public")
-  : path.join(process.cwd(), "public");
+let publicPath = path.join(__dirname, "public");
+if (!fs.existsSync(publicPath)) {
+  publicPath = path.join(process.cwd(), "public");
+}
 app.use(express.static(publicPath));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -74,10 +80,10 @@ const sessionConfig = {
   },
 };
 
-if (process.env.ATLASDB_URL || !process.env.VERCEL) {
+if (process.env.ATLASDB_URL) {
   try {
     const store = MongoStore.create({
-      mongoUrl: dbUrl,
+      mongoUrl: process.env.ATLASDB_URL,
       touchAfter: 24 * 3600,
     });
     store.on("error", (err) => {
@@ -87,13 +93,24 @@ if (process.env.ATLASDB_URL || !process.env.VERCEL) {
   } catch (e) {
     console.warn("Session store fallback to memory:", e.message);
   }
+} else if (!isProd && dbUrl) {
+  try {
+    const store = MongoStore.create({
+      mongoUrl: dbUrl,
+      touchAfter: 24 * 3600,
+    });
+    store.on("error", (err) => {
+      console.log("SESSION STORE NOTICE:", err.message);
+    });
+    sessionConfig.store = store;
+  } catch (e) {}
 }
 
 app.use(session(sessionConfig));
 
-// Ensure DB is connected for serverless requests
+// Ensure DB is connected for serverless requests if DB URL is provided
 app.use(async (req, res, next) => {
-  if (mongoose.connection.readyState < 1) {
+  if (dbUrl && mongoose.connection.readyState < 1) {
     await connectDB();
   }
   next();
@@ -163,8 +180,8 @@ app.use((err, req, res, next) => {
 });
 
 // Start Server
-const PORT = process.env.PORT || 8080;
-if (!process.env.VERCEL) {
+if (require.main === module) {
+  const PORT = process.env.PORT || 8080;
   app.listen(PORT, () => {
     console.log(`🍿 BookMyShow Server running smoothly at http://localhost:${PORT}`);
   });

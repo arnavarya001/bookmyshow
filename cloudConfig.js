@@ -23,21 +23,29 @@ if (process.env.CLOUD_NAME && process.env.CLOUD_API_KEY && process.env.CLOUD_API
     },
   });
 } else {
-  // Local fallback storage so image upload works seamlessly without cloud setup
-  const uploadDir = path.join(__dirname, "public/uploads");
-  if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-  }
+  // Use memoryStorage on serverless or fallback to local disk
+  const isServerless = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME;
+  if (isServerless) {
+    storage = multer.memoryStorage();
+  } else {
+    const uploadDir = path.join(__dirname, "public/uploads");
+    try {
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+    } catch (e) {
+      console.warn("Upload dir notice:", e.message);
+    }
 
-  storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, uploadDir);
-    },
-    filename: function (req, file, cb) {
-      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-      cb(null, uniqueSuffix + path.extname(file.originalname));
-    },
-  });
+    storage = multer.diskStorage({
+      destination: function (req, file, cb) {
+        cb(null, uploadDir);
+      },
+      filename: function (req, file, cb) {
+        cb(null, Date.now() + "-" + file.originalname);
+      },
+    });
+  }
 }
 
 module.exports = {

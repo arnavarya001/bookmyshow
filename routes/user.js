@@ -5,11 +5,24 @@ const wrapAsync = require("../utils/wrapAsync");
 const { saveRedirect, isLoggedIn } = require("../utils/auth");
 const userController = require("../controllers/user");
 
+const mongoose = require("mongoose");
+
+const checkDB = (req, res, next) => {
+  if (mongoose.connection.readyState < 1) {
+    req.flash(
+      "error",
+      "Database is unreachable. In MongoDB Atlas, go to Network Access and add IP 0.0.0.0/0 (Allow access from anywhere), and verify your ATLASDB_URL."
+    );
+    return res.redirect(req.path === "/signup" ? "/signup" : "/login");
+  }
+  next();
+};
+
 // Signup
 router
   .route("/signup")
   .get(userController.renderSignupForm)
-  .post(wrapAsync(userController.signup));
+  .post(checkDB, wrapAsync(userController.signup));
 
 // Login
 router
@@ -17,6 +30,7 @@ router
   .get(userController.renderLoginForm)
   .post(
     saveRedirect,
+    checkDB,
     passport.authenticate("local", {
       failureRedirect: "/login",
       failureFlash: true,

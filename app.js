@@ -123,7 +123,12 @@ app.use(passport.initialize());
 app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
+passport.deserializeUser((id, done) => {
+  if (mongoose.connection.readyState < 1) {
+    return done(null, null);
+  }
+  return User.deserializeUser()(id, done);
+});
 
 // Global Locals Middleware
 app.use((req, res, next) => {

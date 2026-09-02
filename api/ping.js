@@ -1,10 +1,33 @@
-const app = require("../app");
+const mongoose = require("mongoose");
 
-module.exports = (req, res) => {
+module.exports = async (req, res) => {
+  const uri = process.env.ATLASDB_URL;
+  if (!uri) {
+    return res.json({ connected: false, reason: "No ATLASDB_URL configured in Vercel" });
+  }
+  const start = Date.now();
   try {
-    return app(req, res);
+    const conn = await mongoose
+      .createConnection(uri, {
+        serverSelectionTimeoutMS: 3000,
+        connectTimeoutMS: 3000,
+      })
+      .asPromise();
+    const duration = Date.now() - start;
+    const collections = await conn.db.listCollections().toArray();
+    await conn.close();
+    return res.json({
+      connected: true,
+      durationMs: duration,
+      collections: collections.map((c) => c.name),
+    });
   } catch (err) {
-    res.statusCode = 500;
-    return res.end(`Ping caught: ${err.message}\n${err.stack}`);
+    const duration = Date.now() - start;
+    return res.json({
+      connected: false,
+      durationMs: duration,
+      errorName: err.name,
+      errorMessage: err.message,
+    });
   }
 };

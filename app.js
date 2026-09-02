@@ -42,8 +42,8 @@ async function connectDB() {
   }
   try {
     cachedConnection = await mongoose.connect(dbUrl, {
-      serverSelectionTimeoutMS: 2000,
-      connectTimeoutMS: 2000,
+      serverSelectionTimeoutMS: 10000,
+      connectTimeoutMS: 10000,
     });
     console.log("Connected to BookMyShow Database 🎬");
     return cachedConnection;

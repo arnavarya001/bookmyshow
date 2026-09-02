@@ -26,6 +26,9 @@ const userRouter = require("./routes/user");
 const fs = require("fs");
 
 // Database Connection with Serverless Caching
+mongoose.set("bufferCommands", false);
+mongoose.set("bufferTimeoutMS", 2000);
+
 const isProd = process.env.NODE_ENV === "production" || process.env.VERCEL;
 const dbUrl = process.env.ATLASDB_URL || (!isProd ? "mongodb://127.0.0.1:27017/bookmyshow" : null);
 let cachedConnection = null;
@@ -37,7 +40,8 @@ async function connectDB() {
   }
   try {
     cachedConnection = await mongoose.connect(dbUrl, {
-      serverSelectionTimeoutMS: 3000,
+      serverSelectionTimeoutMS: 2000,
+      connectTimeoutMS: 2000,
     });
     console.log("Connected to BookMyShow Database 🎬");
     return cachedConnection;

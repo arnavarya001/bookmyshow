@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Movie = require("../models/movie");
 const User = require("../models/user");
 const Show = require("../models/show");
@@ -22,13 +23,18 @@ module.exports.index = async (req, res, next) => {
     let allGenres = ["Action", "Sci-Fi", "Adventure", "Drama", "Animation"];
     let allLanguages = ["English", "Hindi", "Tamil", "Telugu"];
 
-    try {
-      movies = await Movie.find(filter).sort(sortQuery);
-      trendingMovies = await Movie.find({ isTrending: true }).limit(5);
-      allGenres = await Movie.distinct("genre");
-      allLanguages = await Movie.distinct("language");
-    } catch (dbErr) {
-      console.warn("Database query notice:", dbErr.message);
+    if (mongoose.connection.readyState === 1) {
+      try {
+        movies = await Movie.find(filter).sort(sortQuery);
+        trendingMovies = await Movie.find({ isTrending: true }).limit(5);
+        allGenres = await Movie.distinct("genre");
+        allLanguages = await Movie.distinct("language");
+      } catch (dbErr) {
+        console.warn("Database query notice:", dbErr.message);
+      }
+    }
+
+    if (!movies || movies.length === 0) {
       const { sampleMovies } = require("../init/data");
       movies = sampleMovies.map((m, idx) => ({ ...m, _id: "preview_" + (idx + 1) }));
       trendingMovies = movies.filter((m) => m.isTrending);

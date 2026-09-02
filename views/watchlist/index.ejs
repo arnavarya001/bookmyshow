@@ -1,0 +1,52 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div>
+    <h2 class="fw-bold text-white mb-1"><i class="fa-solid fa-heart text-danger me-2"></i>My Watchlist</h2>
+    <p class="text-muted small mb-0">Movies you've saved to watch later</p>
+  </div>
+  <a href="/movies" class="btn btn-bms-outline btn-sm">
+    <i class="fa-solid fa-plus me-1"></i>Discover More
+  </a>
+</div>
+
+<% if (watchlist && watchlist.length > 0) { %>
+  <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-4 mb-5">
+    <% watchlist.forEach(movie => { %>
+      <div class="col">
+        <div class="movie-card">
+          <!-- Toggle Watchlist -->
+          <button class="movie-watchlist-btn active" data-movie-id="<%= movie._id %>" title="Remove from Watchlist">
+            <i class="fa-solid fa-heart text-danger"></i>
+          </button>
+
+          <a href="/movies/<%= movie._id %>" class="movie-poster-wrap">
+            <img src="<%= movie.poster.url %>" alt="<%= movie.title %>">
+            <div class="movie-rating-badge">
+              <span class="star-score"><i class="fa-solid fa-star"></i> <%= movie.rating %>/10</span>
+              <span class="small text-white-50"><%= movie.votesCount %> votes</span>
+            </div>
+          </a>
+
+          <div class="movie-card-info">
+            <a href="/movies/<%= movie._id %>" class="movie-card-title"><%= movie.title %></a>
+            <div class="movie-card-genres"><%= movie.genre.join(", ") %></div>
+            <div class="d-flex align-items-center justify-content-between mt-auto pt-2">
+              <span class="text-muted small"><%= movie.language[0] %></span>
+              <a href="/shows/movie/<%= movie._id %>" class="btn btn-bms btn-sm py-1 px-3">
+                Book
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% }); %>
+  </div>
+<% } else { %>
+  <div class="text-center py-5 my-5 rounded-4 p-5" style="background: #141722; border: 1px dashed rgba(255,255,255,0.1);">
+    <i class="fa-regular fa-heart text-muted fs-1 mb-3"></i>
+    <h4 class="text-white">Your Watchlist is Empty</h4>
+    <p class="text-muted">Explore movies and tap the heart icon to save titles you are excited to watch.</p>
+    <a href="/movies" class="btn btn-bms mt-2">Browse Movies</a>
+  </div>
+<% } %>

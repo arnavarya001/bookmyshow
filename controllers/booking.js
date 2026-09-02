@@ -1,226 +1,296 @@
 const Booking = require("../models/booking");
-const Listing = require("../models/listing");
+const Show = require("../models/show");
+const Movie = require("../models/movie");
+const Theatre = require("../models/theatre");
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
 
-// ─── Helper: Create Razorpay instance fresh each time ─
-// This ensures .env values are loaded before use
-function getRazorpay() {
-  return new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_KEY_SECRET,
-  });
+// Helper: Get Razorpay instance if keys are available
+function getRazorpayInstance() {
+  if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+    return new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_KEY_SECRET,
+    });
+  }
+  return null;
 }
 
-// ─── RENDER NEW BOOKING FORM ──────────────────────────
-// GET /bookings/:id/book
-module.exports.renderNewForm = async (req, res, next) => {
-  try {
-    const listing = await Listing.findById(req.params.id);
-
-    if (!listing) {
-      req.flash("error", "Listing not found!");
-      return res.redirect("/listings");
-    }
-
-    return res.render("bookings/new", { listing });
-
-  } catch (err) {
-    return next(err);
+// Helper: Generate unique Booking ID
+function generateBookingId() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let result = "BMS-";
+  for (let i = 0; i < 6; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
   }
-};
+  return result;
+}
 
-// ─── CREATE BOOKING — Validate Dates & Create Razorpay Order ──
-// POST /bookings/:id/book
-module.exports.createBooking = async (req, res, next) => {
+// POST /bookings/checkout - Prepare booking & calculate costs
+module.exports.initiateBooking = async (req, res, next) => {
   try {
-    const listing = await Listing.findById(req.params.id);
+    const { showId, selectedSeats, seatCategory, selectedSnacks } = req.body;
 
-    if (!listing) {
-      req.flash("error", "Listing not found!");
-      return res.redirect("/listings");
+    if (!selectedSeats) {
+      req.flash("error", "Please select at least one seat!");
+      return res.redirect(`/shows/${showId}/seats`);
     }
 
-    const { checkIn, checkOut } = req.body;
+    const seatsArray = Array.isArray(selectedSeats)
+      ? selectedSeats
+      : selectedSeats.split(",").map((s) => s.trim()).filter(Boolean);
 
-    const checkInDate = new Date(checkIn);
-    const checkOutDate = new Date(checkOut);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    // Validate: check-in cannot be in the past
-    if (checkInDate < today) {
-      req.flash("error", "Check-in date cannot be in the past!");
-      return res.redirect(`/bookings/${req.params.id}/book`);
+    if (seatsArray.length === 0) {
+      req.flash("error", "Please select at least one seat!");
+      return res.redirect(`/shows/${showId}/seats`);
     }
 
-    // Validate: check-out must be after check-in
-    if (checkOutDate <= checkInDate) {
-      req.flash("error", "Check-out date must be after check-in date!");
-      return res.redirect(`/bookings/${req.params.id}/book`);
+    const show = await Show.findById(showId).populate("movie").populate("theatre");
+    if (!show) {
+      req.flash("error", "Show not found!");
+      return res.redirect("/movies");
     }
 
-    // Calculate nights and price
-    const nights = Math.ceil(
-      (checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)
-    );
-
-    const totalPrice = nights * listing.price;
-    const gst = Math.round(totalPrice * 0.18);
-    const grandTotal = totalPrice + gst;
-
-    // Debug: Check if Razorpay keys exist
-    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
-      req.flash("error", "Payment service not configured!");
-      return res.redirect(`/listings/${listing._id}`);
+    // Check if any seat is already booked
+    const alreadyBooked = seatsArray.some((seat) => show.bookedSeats.includes(seat));
+    if (alreadyBooked) {
+      req.flash("error", "One or more chosen seats were just booked. Please select different seats.");
+      return res.redirect(`/shows/${showId}/seats`);
     }
 
-    // Create Razorpay order (amount in paise)
-    const razorpay = getRazorpay();
-    const order = await razorpay.orders.create({
-      amount: grandTotal * 100,
-      currency: "INR",
-      receipt: `bk_${listing._id}_${Date.now()}`.slice(0, 40),
-    });
+    // Calculate ticket prices
+    const category = seatCategory || "Prime";
+    const seatRate =
+      category.toLowerCase() === "recliner"
+        ? show.priceTiers.recliner
+        : category.toLowerCase() === "classic"
+        ? show.priceTiers.classic
+        : show.priceTiers.prime;
 
-    // Save pending booking in session
-    req.session.pendingBooking = {
-      listingId: listing._id.toString(),
-      checkIn: checkInDate,
-      checkOut: checkOutDate,
-      nights,
-      totalPrice,
-      gst,
+    const ticketAmount = seatRate * seatsArray.length;
+
+    // Parse snacks
+    let parsedSnacks = [];
+    let snacksAmount = 0;
+    if (selectedSnacks) {
+      try {
+        const rawSnacks = typeof selectedSnacks === "string" ? JSON.parse(selectedSnacks) : selectedSnacks;
+        parsedSnacks = Object.keys(rawSnacks)
+          .filter((k) => rawSnacks[k].quantity > 0)
+          .map((k) => ({
+            name: rawSnacks[k].name,
+            quantity: Number(rawSnacks[k].quantity),
+            price: Number(rawSnacks[k].price),
+          }));
+
+        snacksAmount = parsedSnacks.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      } catch (e) {
+        console.error("Snack parse error:", e);
+      }
+    }
+
+    // Base total & convenience fee (e.g. ₹35 per ticket + 18% GST)
+    const baseFee = seatsArray.length * 35;
+    const convenienceFee = Math.round(baseFee * 1.18);
+    const grandTotal = ticketAmount + snacksAmount + convenienceFee;
+
+    // Razorpay Order Creation (if keys provided; otherwise mock order for testing)
+    let orderId = `order_mock_${Date.now()}`;
+    const razorpay = getRazorpayInstance();
+
+    if (razorpay) {
+      try {
+        const rzpOrder = await razorpay.orders.create({
+          amount: grandTotal * 100, // in paise
+          currency: "INR",
+          receipt: `rcpt_${Date.now()}`.slice(0, 40),
+        });
+        orderId = rzpOrder.id;
+      } catch (err) {
+        console.warn("Razorpay API warning (using test checkout):", err.message);
+      }
+    }
+
+    // Store in session for payment verification
+    req.session.pendingBMSBooking = {
+      showId: show._id.toString(),
+      movieId: show.movie._id.toString(),
+      theatreId: show.theatre._id.toString(),
+      showDate: show.showDate,
+      showTime: show.showTime,
+      format: show.format,
+      seats: seatsArray,
+      seatCategory: category,
+      snacks: parsedSnacks,
+      ticketAmount,
+      snacksAmount,
+      convenienceFee,
       grandTotal,
-      orderId: order.id,
+      orderId,
     };
 
-    // Render payment page
-    return res.render("bookings/payment", {
-      listing,
-      order,
-      totalPrice,
-      gst,
-      grandTotal,
-      checkIn,
-      checkOut,
-      nights,
-      razorpayKey: process.env.RAZORPAY_KEY_ID,
+    req.session.save((err) => {
+      if (err) return next(err);
+      return res.render("bookings/payment", {
+        show,
+        seats: seatsArray,
+        seatCategory: category,
+        ticketAmount,
+        snacks: parsedSnacks,
+        snacksAmount,
+        convenienceFee,
+        grandTotal,
+        orderId,
+        razorpayKey: process.env.RAZORPAY_KEY_ID || "rzp_test_mock_key",
+        user: req.user,
+      });
     });
-
   } catch (err) {
-    console.error("Razorpay Order Error:", err); // Terminal mein error dikhega
     return next(err);
   }
 };
 
-// ─── VERIFY PAYMENT & SAVE BOOKING ───────────────────
-// POST /bookings/verify-payment
+// POST /bookings/verify-payment - Confirm booking and issue digital ticket
 module.exports.verifyPayment = async (req, res, next) => {
   try {
-    const {
-      razorpay_order_id,
-      razorpay_payment_id,
-      razorpay_signature,
-    } = req.body;
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, test_mode } = req.body;
 
-    // Verify Razorpay signature using HMAC SHA256
-    const body = razorpay_order_id + "|" + razorpay_payment_id;
-
-    const expectedSignature = crypto
-      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-      .update(body)
-      .digest("hex");
-
-    if (expectedSignature !== razorpay_signature) {
-      req.flash("error", "Payment verification failed! Please try again.");
-      return res.redirect("/listings");
+    const pending = req.session.pendingBMSBooking;
+    if (!pending) {
+      req.flash("error", "Booking session expired! Please select your seats again.");
+      return res.redirect("/movies");
     }
 
-    // Get pending booking from session
-    const pendingBooking = req.session.pendingBooking;
+    // If live Razorpay keys are configured and this is not a test mode submit, verify signature
+    if (process.env.RAZORPAY_KEY_SECRET && !test_mode && razorpay_signature) {
+      const body = razorpay_order_id + "|" + razorpay_payment_id;
+      const expectedSignature = crypto
+        .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+        .update(body)
+        .digest("hex");
 
-    if (!pendingBooking) {
-      req.flash("error", "Booking session expired! Please try again.");
-      return res.redirect("/listings");
+      if (expectedSignature !== razorpay_signature) {
+        req.flash("error", "Payment verification failed! Please try again.");
+        return res.redirect(`/shows/${pending.showId}/seats`);
+      }
     }
 
-    // Save confirmed booking to database
-    const booking = new Booking({
-      listing: pendingBooking.listingId,
+    // Lock seats in the Show model
+    const show = await Show.findById(pending.showId);
+    if (!show) {
+      req.flash("error", "Show not found!");
+      return res.redirect("/movies");
+    }
+
+    show.bookedSeats.push(...pending.seats);
+    await show.save();
+
+    const bookingId = generateBookingId();
+    const qrData = `BOOKING:${bookingId}|MOVIE:${pending.movieId}|SEATS:${pending.seats.join(",")}|DATE:${new Date(pending.showDate).toLocaleDateString()}|TIME:${pending.showTime}`;
+
+    // Create confirmed booking
+    const newBooking = new Booking({
+      bookingId,
       user: req.user._id,
-      checkIn: pendingBooking.checkIn,
-      checkOut: pendingBooking.checkOut,
-      nights: pendingBooking.nights,
-      totalPrice: pendingBooking.grandTotal,
-      paymentId: razorpay_payment_id,
-      orderId: razorpay_order_id,
+      movie: pending.movieId,
+      theatre: pending.theatreId,
+      show: pending.showId,
+      showDate: pending.showDate,
+      showTime: pending.showTime,
+      format: pending.format,
+      seats: pending.seats,
+      seatCategory: pending.seatCategory,
+      snacks: pending.snacks,
+      ticketAmount: pending.ticketAmount,
+      snacksAmount: pending.snacksAmount,
+      convenienceFee: pending.convenienceFee,
+      grandTotal: pending.grandTotal,
+      orderId: razorpay_order_id || pending.orderId,
+      paymentId: razorpay_payment_id || `PAY_MOCK_${Date.now()}`,
       paymentStatus: "paid",
+      qrCode: qrData,
     });
 
-    await booking.save();
+    await newBooking.save();
 
     // Clear session
-    delete req.session.pendingBooking;
+    delete req.session.pendingBMSBooking;
 
-    req.flash(
-      "success",
-      `Booking confirmed! ${pendingBooking.nights} night(s) — ₹${pendingBooking.grandTotal.toLocaleString("en-IN")} paid ✅`
-    );
-
-    return res.redirect("/bookings/history");
-
+    req.flash("success", `🎉 Booking Confirmed! Ticket ID: ${bookingId}`);
+    return res.redirect(`/bookings/ticket/${newBooking._id}`);
   } catch (err) {
-    console.error("Payment Verify Error:", err);
     return next(err);
   }
 };
 
-// ─── BOOKING HISTORY ──────────────────────────────────
-// GET /bookings/history
+// GET /bookings/ticket/:id - Digital Movie Ticket
+module.exports.viewTicket = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const booking = await Booking.findById(id)
+      .populate("movie")
+      .populate("theatre")
+      .populate("show")
+      .populate("user", "username email phone");
+
+    if (!booking) {
+      req.flash("error", "Ticket not found!");
+      return res.redirect("/movies");
+    }
+
+    // Ensure only the ticket owner or admin can view
+    if (!booking.user.equals(req.user._id) && req.user.role !== "admin") {
+      req.flash("error", "Unauthorized access to this ticket!");
+      return res.redirect("/movies");
+    }
+
+    return res.render("bookings/ticket", { booking });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+// GET /bookings/history - Booking History
 module.exports.bookingHistory = async (req, res, next) => {
   try {
     const bookings = await Booking.find({ user: req.user._id })
-      .populate("listing")
+      .populate("movie")
+      .populate("theatre")
+      .populate("show")
       .sort({ createdAt: -1 });
 
     return res.render("bookings/history", { bookings });
-
   } catch (err) {
     return next(err);
   }
 };
 
-// ─── CANCEL BOOKING ───────────────────────────────────
-// DELETE /bookings/:bookingId
+// POST /bookings/:id/cancel - Cancel ticket
 module.exports.cancelBooking = async (req, res, next) => {
   try {
-    const booking = await Booking.findById(req.params.bookingId);
+    const { id } = req.params;
+    const booking = await Booking.findById(id);
 
-    // Check if booking exists
     if (!booking) {
       req.flash("error", "Booking not found!");
       return res.redirect("/bookings/history");
     }
 
-    // Check if current user owns this booking
-    if (!booking.user.equals(req.user._id)) {
-      req.flash("error", "You are not authorized to cancel this booking!");
+    if (!booking.user.equals(req.user._id) && req.user.role !== "admin") {
+      req.flash("error", "Unauthorized to cancel this ticket!");
       return res.redirect("/bookings/history");
     }
 
-    // If booking is paid — mark as cancelled instead of deleting
-    if (booking.paymentStatus === "paid") {
-      await Booking.findByIdAndUpdate(req.params.bookingId, {
-        paymentStatus: "cancelled",
-      });
-    } else {
-      await Booking.findByIdAndDelete(req.params.bookingId);
-    }
+    // Release seats in the Show model
+    await Show.findByIdAndUpdate(booking.show, {
+      $pull: { bookedSeats: { $in: booking.seats } },
+    });
 
-    req.flash("success", "Booking cancelled successfully!");
+    booking.paymentStatus = "cancelled";
+    await booking.save();
+
+    req.flash("success", "Ticket cancelled successfully. Refund will be processed in 3-5 business days.");
     return res.redirect("/bookings/history");
-
   } catch (err) {
     return next(err);
   }

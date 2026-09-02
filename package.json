@@ -1,106 +1,47 @@
 {
-  
-    "engines": {
-  
-      
-    "node": "20.20.2"
-  
-    },
-  
-    "name": "project",
-  
-    "version": "1.0.0",
-  
-    "description": "",
-  
-    "main": "index.js",
-  
-    "scripts": {
-  
-      
+  "name": "bookmyshow-clone",
+  "version": "1.0.0",
+  "description": "Full-Stack BookMyShow Movie Ticket Booking Platform with MVC Architecture",
+  "main": "app.js",
+  "scripts": {
     "start": "node app.js",
-  
-      
+    "seed": "node init/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
-  
-    },
-  
-    "keywords": [],
-  
-    "author": "",
-  
-    "license": "ISC",
-  
-    "dependencies": {
-  
-      
+  },
+  "keywords": [
+    "bookmyshow",
+    "movie-booking",
+    "cinema",
+    "express",
+    "mongoose",
+    "ejs",
+    "razorpay",
+    "mvc"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
     "@mapbox/mapbox-sdk": "^0.16.2",
-  
-      
     "axios": "^1.15.2",
-  
-      
     "cloudinary": "^1.41.0",
-  
-      
     "connect-flash": "^0.1.1",
-  
-      
     "connect-mongo": "^4.6.0",
-  
-      
-    "crypto": "^1.0.1",
-  
-      
     "dotenv": "^17.4.2",
-  
-      
     "ejs": "^5.0.2",
-  
-      
     "ejs-mate": "^4.0.0",
-  
-      
     "express": "^5.2.1",
-  
-      
     "express-session": "^1.19.0",
-  
-      
     "helmet": "^8.1.0",
-  
-      
     "joi": "^18.1.2",
-  
-      
     "method-override": "^3.0.0",
-  
-      
     "mongoose": "^9.5.0",
-  
-      
     "multer": "^2.1.1",
-  
-      
     "multer-storage-cloudinary": "^4.0.0",
-  
-      
     "nodemailer": "^8.0.6",
-  
-      
     "passport": "^0.7.0",
-  
-      
     "passport-local": "^1.0.0",
-  
-      
     "passport-local-mongoose": "^9.0.1",
-  
-      
     "razorpay": "^2.9.6",
-  
-      
     "twilio": "^6.0.0"
-  
-    }
+  }
 }

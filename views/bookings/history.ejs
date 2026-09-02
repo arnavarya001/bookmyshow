@@ -1,187 +1,83 @@
 <% layout("/layouts/boilerplate") %>
 
-<style>
-  .bookings-hero {
-    background: linear-gradient(135deg, #fff0f0, #ffe8e8);
-    border-radius: 1.5rem;
-    padding: 2rem;
-    margin-bottom: 2rem;
-    border-left: 4px solid #fe424d;
-  }
-
-  body.dark-mode .bookings-hero {
-    background: linear-gradient(135deg, #2a1a1a, #1e1515);
-  }
-
-  .booking-card {
-    border: none;
-    border-radius: 1.2rem;
-    overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    transition: transform 0.25s, box-shadow 0.25s;
-    background: white;
-  }
-
-  .booking-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 30px rgba(254,66,77,0.12);
-  }
-
-  body.dark-mode .booking-card {
-    background: #1e1e1e;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-  }
-
-  .booking-card img {
-    width: 100%;
-    height: 150px;
-    object-fit: cover;
-    transition: transform 0.3s;
-  }
-
-  .booking-card:hover img {
-    transform: scale(1.05);
-  }
-
-  .confirmed-badge {
-    background: linear-gradient(135deg, #28a745, #20c997);
-    color: white;
-    border-radius: 50px;
-    padding: 3px 12px;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-  }
-
-  .btn-cancel {
-    border: 1.5px solid #fe424d;
-    color: #fe424d;
-    border-radius: 50px;
-    padding: 5px 14px;
-    font-size: 12px;
-    font-weight: 600;
-    background: transparent;
-    transition: all 0.2s;
-    cursor: pointer;
-  }
-
-  .btn-cancel:hover {
-    background: #fe424d;
-    color: white;
-  }
-
-  .btn-view {
-    background: #222;
-    color: white;
-    border-radius: 50px;
-    padding: 5px 14px;
-    font-size: 12px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.2s;
-  }
-
-  .btn-view:hover {
-    background: #444;
-    color: white;
-  }
-
-  .date-chip {
-    background: #f0f0f0;
-    border-radius: 50px;
-    padding: 4px 10px;
-    font-size: 11px;
-    color: #555;
-    display: inline-block;
-  }
-
-  body.dark-mode .date-chip {
-    background: #2a2a2a;
-    color: #aaa;
-  }
-
-  .empty-state {
-    background: white;
-    border-radius: 1.5rem;
-    padding: 4rem 2rem;
-    text-align: center;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-  }
-
-  body.dark-mode .empty-state {
-    background: #1e1e1e;
-  }
-
-  .count-badge {
-    background: linear-gradient(135deg, #fe424d, #ff6b6b);
-    color: white;
-    border-radius: 50px;
-    padding: 4px 14px;
-    font-size: 13px;
-    font-weight: 600;
-  }
-</style>
-<div class="mt-4 mb-5">
-
-  <!-- HERO -->
-  <div class="bookings-hero d-flex align-items-center gap-3">
-    <i class="fa-solid fa-calendar-check fa-2x" style="color:#fe424d;"></i>
-
-    <h4 class="mb-0">My Bookings</h4>
-
-    <span class="ms-auto count-badge">
-      <%= bookings.length %> booking<%= bookings.length !== 1 ? "s" : "" %>
-    </span>
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div>
+    <h2 class="fw-bold text-white mb-1"><i class="fa-solid fa-ticket text-danger me-2"></i>Your Bookings & Tickets</h2>
+    <p class="text-muted small mb-0">View, download or manage your cinema tickets</p>
   </div>
+  <a href="/movies" class="btn btn-bms-outline btn-sm">
+    <i class="fa-solid fa-plus me-1"></i>Book More Movies
+  </a>
+</div>
 
-  <!-- BOOKINGS LIST -->
-  <% if(bookings.length > 0){ %>
+<% if (bookings && bookings.length > 0) { %>
+  <div class="row row-cols-1 g-4">
+    <% bookings.forEach(b => { %>
+      <div class="col">
+        <div class="p-4 rounded-4" style="background: #141722; border: 1px solid rgba(255,255,255,0.08);">
+          <div class="row align-items-center g-3">
+            <!-- Movie Thumbnail -->
+            <div class="col-auto">
+              <img src="<%= b.movie?.poster?.url || 'https://images.unsplash.com/photo-1536440136628-849c177e76a1' %>" 
+                   alt="<%= b.movie?.title %>" 
+                   class="rounded-3 shadow" 
+                   style="width: 70px; height: 100px; object-fit: cover;">
+            </div>
 
-    <div class="row mt-4">
-      <% bookings.forEach(booking => { %>
+            <!-- Ticket Details -->
+            <div class="col-md-5">
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <h5 class="fw-bold text-white mb-0"><%= b.movie ? b.movie.title : 'Movie' %></h5>
+                <span class="badge bg-secondary" style="font-size: 0.7rem;"><%= b.format %></span>
+              </div>
+              <div class="text-muted small mb-1">
+                <strong><%= b.theatre ? b.theatre.name : 'Cinema' %></strong> • <%= b.show ? b.show.screen : 'Audi 1' %>
+              </div>
+              <div class="text-white small">
+                <i class="fa-regular fa-calendar text-danger me-1"></i>
+                <%= new Date(b.showDate).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) %> at <%= b.showTime %>
+              </div>
+            </div>
 
-        <div class="col-md-4 mb-4">
-          <div class="booking-card p-3">
+            <!-- Seat & Price Info -->
+            <div class="col-md-3">
+              <span class="text-muted small d-block">Seats (<%= b.seatCategory %>):</span>
+              <div class="d-flex gap-1 flex-wrap mb-2">
+                <% b.seats.forEach(s => { %>
+                  <span class="badge bg-danger"><%= s %></span>
+                <% }); %>
+              </div>
+              <span class="text-success fw-bold fs-6">₹<%= b.grandTotal.toLocaleString("en-IN") %></span>
+              <span class="badge <%= b.paymentStatus === 'paid' ? 'bg-success' : 'bg-danger' %> ms-2" style="font-size: 0.72rem;">
+                <%= b.paymentStatus.toUpperCase() %>
+              </span>
+            </div>
 
-            <img src="<%= booking.listing.image?.url %>" 
-                 class="img-fluid rounded mb-2">
-
-            <h5 class="fw-bold"><%= booking.listing.title %></h5>
-
-            <p class="text-muted mb-1">
-              📍 <%= booking.listing.location %>
-            </p>
-
-            <p class="mb-1">
-              <b>Check-in:</b> <%= booking.checkIn.toDateString() %><br>
-              <b>Check-out:</b> <%= booking.checkOut.toDateString() %>
-            </p>
-
-            <p class="mb-1">
-              <b>Nights:</b> <%= booking.nights %>
-            </p>
-
-            <p class="fw-bold text-danger">
-              ₹<%= booking.totalPrice.toLocaleString("en-IN") %>
-            </p>
-
-            <form action="/bookings/<%= booking._id %>?_method=DELETE" method="POST">
-              <button class="btn btn-sm btn-outline-danger">Cancel</button>
-            </form>
-
+            <!-- Actions -->
+            <div class="col-md-2 text-md-end">
+              <div class="d-flex flex-column gap-2">
+                <a href="/bookings/ticket/<%= b._id %>" class="btn btn-bms btn-sm w-100">
+                  <i class="fa-solid fa-eye me-1"></i>View Ticket
+                </a>
+                <% if (b.paymentStatus === 'paid') { %>
+                  <form action="/bookings/<%= b._id %>/cancel" method="POST" onsubmit="return confirm('Cancel this booking?');">
+                    <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                      Cancel
+                    </button>
+                  </form>
+                <% } %>
+              </div>
+            </div>
           </div>
         </div>
-
-      <% }) %>
-    </div>
-
-  <% } else { %>
-
-    <div class="empty-state mt-4">
-      <h5>No bookings yet 😢</h5>
-      <a href="/listings" class="btn btn-danger mt-3">Browse Stays</a>
-    </div>
-
-  <% } %>
-
-</div>
+      </div>
+    <% }); %>
+  </div>
+<% } else { %>
+  <div class="text-center py-5 my-5 rounded-4 p-5" style="background: #141722; border: 1px dashed rgba(255,255,255,0.1);">
+    <i class="fa-solid fa-ticket-simple text-muted fs-1 mb-3"></i>
+    <h4 class="text-white">No Tickets Booked Yet</h4>
+    <p class="text-muted">You haven't booked any movie tickets yet. Pick an exciting movie to get started!</p>
+    <a href="/movies" class="btn btn-bms mt-2">Explore Movies Now</a>
+  </div>
+<% } %>

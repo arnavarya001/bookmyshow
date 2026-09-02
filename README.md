@@ -1,144 +1,95 @@
-# 🏡 Airbnb Clone – Full Stack Web Application
+# 🍿 BookMyShow Clone – Full Stack Movie Ticket Booking Application
 
-🚀 A modern Airbnb-inspired full-stack web application where users can explore, create, and manage property listings with authentication, maps, and booking-like functionality.
-
----
-
-## 🔗 Live Demo
-
-👉 **Live Website:** https://airbnb-xbd4.onrender.com/listings
-👉 **GitHub Repo:** https://github.com/Yusuf8957/Project
+🚀 A modern, responsive, and feature-complete **BookMyShow** clone built using the **MVC (Model-View-Controller)** architecture with **Node.js, Express, MongoDB (Mongoose), EJS, Passport.js, and Razorpay**.
 
 ---
 
-## ✨ Features
+## ✨ Key Features
 
-* 🔐 Secure Authentication (Signup/Login/Logout)
-* 🏠 Add, Edit & Delete Listings
-* 🖼️ Image Upload & Management
-* 📍 Interactive Map Integration
-* 🔎 Search & Filter Listings
-* 📱 Fully Responsive Design
-* ⚙️ MVC Architecture (Clean & Scalable Code)
-* 🧾 Session Management & Authorization
+* 🎬 **Movies Catalog & Hero Spotlight**: Explore now showing and upcoming blockbuster movies with genre & language filters.
+* 📍 **Cinema & Theatre Locator**: Browse multi-screen cinema chains (PVR, INOX, Cinepolis) with an interactive **Leaflet Map**.
+* 🗓️ **Showtime Schedules & Multi-Date Picker**: Dynamic showtime selector with 5-day date tabs and format pills (IMAX 3D, 2D, 4DX).
+* 💺 **Interactive 2D Seat Matrix**: Visual auditorium seat selector with **Recliner**, **Prime**, and **Classic** rows, live seat counter, and instant price calculation.
+* 🍿 **Concessions & F&B Add-ons**: Add gourmet snacks (Caramel Popcorn, Nachos, Pepsi Combo) to your ticket.
+* 💳 **Seamless Payments**: Integrated with Razorpay and includes a 1-click **Instant Demo Checkout** for fast local testing.
+* 🎟️ **Digital M-Ticket**: High-fidelity digital ticket stub complete with perforated tear line, booking reference ID, screen, audi number, and live **QR code**.
+* 📜 **Booking History & Cancellation**: View past bookings, download/print tickets, or cancel reservations with automatic seat release.
+* ⭐ **Movie Ratings & Reviews**: 1-10 rating system with reviews and recalculation of movie averages.
+* ❤️ **Personalized Watchlist**: Add/remove movies from your personal watchlist via dynamic AJAX requests.
+* 🔐 **Secure Authentication**: Built with Passport.js local strategy with role-based permissions (`user`, `admin`).
+* 🎨 **Signature BookMyShow Aesthetics**: Custom dark mode with crimson accents (`#F84464`, `#151821`), glassmorphism, Plus Jakarta Sans typography, and micro-animations.
 
 ---
 
 ## 🛠️ Tech Stack
 
-### 💻 Frontend
+### Frontend
+* **EJS** (Embedded JavaScript Templates) with **ejs-mate** layouts
+* **Vanilla CSS** with modern design tokens & dark mode surfaces
+* **Bootstrap 5.3** & **FontAwesome 6**
+* **Leaflet.js** (Interactive OpenStreetMap / Cinema locator)
 
-* HTML, CSS, JavaScript
-* EJS (Embedded JavaScript Templates)
-
-### ⚙️ Backend
-
-* Node.js
-* Express.js
-
-### 🗄️ Database
-
-* MongoDB (Mongoose)
-
-### 🔧 Tools & Libraries
-
-* Passport.js – Authentication
-* Cloudinary – Image Upload *(if used)*
-* Mapbox / Google Maps – Location Services
+### Backend
+* **Node.js & Express.js** (MVC architecture)
+* **MongoDB & Mongoose** (Relational-style object modeling)
+* **Passport.js & passport-local-mongoose** (Authentication & session management)
+* **connect-mongo** (Persistent MongoDB session store)
+* **Multer & Cloudinary** (Image handling with local disk fallback)
+* **Razorpay SDK** (Payments with HMAC-SHA256 signature verification)
 
 ---
 
 ## 📂 Project Structure
 
-```id="9zxzfd"
-Airbnb-Clone/
-│
-├── models/          # Mongoose schemas
-├── routes/          # Express routes
-├── controllers/     # Business logic
-├── views/           # EJS templates
-├── public/          # Static assets (CSS, JS)
-├── utils/           # Helper functions
-├── middleware.js    # Custom middleware
-├── app.js           # Entry point
+```
+bookmyshow-clone/
+├── controllers/          # Business logic (movie, theatre, show, booking, review, user)
+├── models/               # Mongoose schemas (Movie, Theatre, Show, Booking, Review, User)
+├── routes/               # Express routers (movie, theatre, show, booking, review, user)
+├── views/                # EJS templates
+│   ├── layouts/          # boilerplate.ejs layout
+│   ├── includes/         # navbar, footer, flash partials
+│   ├── movies/           # index, show, new, edit, search
+│   ├── shows/            # select-show, seat-layout
+│   ├── bookings/         # payment, ticket, history
+│   ├── theatres/         # index, show
+│   ├── users/            # login, signup
+│   └── watchlist/        # index
+├── public/               # Static assets
+│   ├── css/              # style.css design system
+│   └── js/               # script.js, seat-selection.js
+├── init/                 # Database seed data (data.js, index.js)
+├── middleware.js         # Authentication, authorization, and validation middleware
+├── cloudConfig.js        # Cloudinary and local disk storage handler
+├── app.js                # Server entry point
 └── package.json
 ```
 
 ---
 
-## ⚙️ Installation & Setup
+## ⚙️ Installation & Quickstart
 
-### 1️⃣ Clone Repository
+### 1️⃣ Configure Environment Variables
+Copy `.env.example` to `.env`:
+```bash
+cp .env.example .env
+```
+Ensure `ATLASDB_URL` points to your MongoDB instance (defaults to `mongodb://127.0.0.1:27017/bookmyshow`).
 
-```bash id="v1g47m"
-git clone https://github.com/Yusuf8957/Project.git
+### 2️⃣ Seed the Database
+Populate the database with blockbuster movies, cinema halls, showtimes, and reviews:
+```bash
+npm run seed
 ```
 
-### 2️⃣ Navigate to Folder
-
-```bash id="zfrd51"
-cd Project
+### 3️⃣ Start the Server
+```bash
+npm start
 ```
-
-### 3️⃣ Install Dependencies
-
-```bash id="pn4m6g"
-npm install
-```
-
-### 4️⃣ Setup Environment Variables
-
-Create a `.env` file in root:
-
-```id="n91smb"
-MONGO_URL=your_mongodb_connection
-SESSION_SECRET=your_secret_key
-CLOUDINARY_KEY=your_key
-CLOUDINARY_SECRET=your_secret
-```
-
-### 5️⃣ Run Server
-
-```bash id="v60tb3"
-nodemon app.js
-```
-
-### 6️⃣ Open in Browser
-
-```id="t4u38k"
-http://localhost:3000
-```
+Open **http://localhost:8080** in your browser.
 
 ---
 
-## 🚀 Future Improvements
-
-* 💳 Payment Integration (Razorpay / Stripe)
-* ⭐ Reviews & Ratings System
-* 📅 Booking Date System
-* ❤️ Wishlist Feature
-* 🔔 Notifications
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome!
-
-1. Fork the repo
-2. Create a new branch
-3. Commit your changes
-4. Push to your branch
-5. Open a Pull Request
-
----
-
-## 👨‍💻 Author
-
-**Yusuf**
-
----
-
-## ⭐ Support
-
-If you like this project, give it a ⭐ on GitHub — it really helps!
+## 🔑 Default Accounts (Created by Seed)
+* **Admin**: `username: admin` | `password: admin123` (Access to add/edit/delete movies)
+* **User**: `username: cinephile` | `password: user123`

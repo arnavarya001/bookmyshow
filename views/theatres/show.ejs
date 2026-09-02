@@ -1,0 +1,64 @@
+<% layout("/layouts/boilerplate") %>
+
+<!-- Cinema Header -->
+<div class="p-4 rounded-4 mb-4" style="background: #141722; border: 1px solid rgba(255,255,255,0.08);">
+  <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+    <div>
+      <span class="badge bg-danger text-uppercase mb-2"><%= theatre.chain %></span>
+      <h2 class="fw-bold text-white mb-1"><%= theatre.name %></h2>
+      <p class="text-muted small mb-3"><i class="fa-solid fa-location-dot text-danger me-1"></i><%= theatre.address %>, <%= theatre.city %></p>
+
+      <div class="d-flex flex-wrap gap-2">
+        <% theatre.amenities.forEach(a => { %>
+          <span class="badge bg-secondary bg-opacity-25 border border-secondary text-white-50" style="font-size: 0.75rem;"><%= a %></span>
+        <% }); %>
+      </div>
+    </div>
+    <div>
+      <a href="/theatres" class="btn btn-bms-dark btn-sm">
+        <i class="fa-solid fa-arrow-left me-1"></i>All Theatres
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Movies Playing at this Cinema -->
+<h3 class="fw-bold text-white mb-4">Now Showing at <%= theatre.name %></h3>
+
+<% if (currentPlaying && currentPlaying.length > 0) { %>
+  <div class="d-flex flex-column gap-4 mb-5">
+    <% currentPlaying.forEach(item => { %>
+      <div class="p-4 rounded-4" style="background: #141722; border: 1px solid rgba(255,255,255,0.08);">
+        <div class="row align-items-center">
+          <div class="col-lg-4 mb-3 mb-lg-0 d-flex gap-3 align-items-center">
+            <img src="<%= item.movie.poster.url %>" alt="<%= item.movie.title %>" class="rounded-3 shadow" style="width: 60px; height: 90px; object-fit: cover;">
+            <div>
+              <h5 class="fw-bold text-white mb-1"><%= item.movie.title %></h5>
+              <div class="text-muted small"><%= item.movie.language.join(", ") %> • <%= item.movie.certificate %></div>
+              <small class="text-white-50"><%= Math.floor(item.movie.duration / 60) %>h <%= item.movie.duration % 60 %>m</small>
+            </div>
+          </div>
+
+          <div class="col-lg-8">
+            <div class="d-flex flex-wrap gap-3">
+              <% item.showtimes.forEach(s => { %>
+                <a href="/shows/<%= s._id %>/seats" 
+                   class="btn text-start p-2 px-3 rounded-3"
+                   style="background: #1F2432; border: 1px solid rgba(255,255,255,0.1); color: #00E676; min-width: 100px;">
+                  <div class="fw-bold"><%= s.showTime %></div>
+                  <div class="text-muted small" style="font-size: 0.72rem;"><%= s.format %> • <%= s.screen %></div>
+                </a>
+              <% }); %>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% }); %>
+  </div>
+<% } else { %>
+  <div class="text-center py-5 my-5 rounded-4 p-5" style="background: #141722; border: 1px dashed rgba(255,255,255,0.1);">
+    <i class="fa-solid fa-film text-muted fs-1 mb-3"></i>
+    <h4 class="text-white">No active schedules right now</h4>
+    <p class="text-muted">Please check back later or view movies showing in other cinemas.</p>
+  </div>
+<% } %>

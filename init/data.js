@@ -1,352 +1,228 @@
-const sampleListings = [
+const sampleMovies = [
   {
-    title: "Cozy Beachfront Cottage",
-    description:
-      "Escape to this charming beachfront cottage for a relaxing getaway. Enjoy stunning ocean views and easy access to the beach.",
-    image: {
-      filename: "listingimage",
-      url: "https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fHRyYXZlbHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=800&q=60",
+    title: "Dune: Part Two",
+    synopsis: "Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family. Facing a choice between the love of his life and the fate of the universe, he endeavors to prevent a terrible future only he can foresee.",
+    genre: ["Action", "Sci-Fi", "Adventure"],
+    language: ["English", "Hindi", "Tamil"],
+    duration: 166,
+    rating: 8.8,
+    votesCount: 34200,
+    certificate: "UA 16+",
+    format: ["2D", "IMAX 3D", "4DX", "ICE"],
+    poster: {
+      url: "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80",
+      filename: "dune2_poster",
     },
-    price: 1500,
-    location: "Malibu",
-    country: "United States",
+    backdrop: {
+      url: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1600&q=80",
+      filename: "dune2_backdrop",
+    },
+    trailerUrl: "https://www.youtube.com/embed/Way9Dexny3w",
+    cast: [
+      { name: "Timothée Chalamet", role: "Paul Atreides", photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80" },
+      { name: "Zendaya", role: "Chani", photo: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" },
+      { name: "Rebecca Ferguson", role: "Lady Jessica", photo: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80" },
+      { name: "Austin Butler", role: "Feyd-Rautha", photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80" },
+    ],
+    director: "Denis Villeneuve",
+    isTrending: true,
   },
   {
-    title: "Modern Loft in Downtown",
-    description:
-      "Stay in the heart of the city in this stylish loft apartment. Perfect for urban explorers!",
-    image: {
-      filename: "listingimage",
-      url: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fHRyYXZlbHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=800&q=60",
+    title: "Oppenheimer",
+    synopsis: "The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb during World War II, exploring the profound moral, psychological, and global consequences of humanity's greatest discovery.",
+    genre: ["Biography", "Drama", "History"],
+    language: ["English", "Hindi"],
+    duration: 180,
+    rating: 8.9,
+    votesCount: 48900,
+    certificate: "A",
+    format: ["2D", "IMAX 3D"],
+    poster: {
+      url: "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?auto=format&fit=crop&w=600&q=80",
+      filename: "oppenheimer_poster",
     },
-    price: 1200,
-    location: "New York City",
-    country: "United States",
+    backdrop: {
+      url: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1600&q=80",
+      filename: "oppenheimer_backdrop",
+    },
+    trailerUrl: "https://www.youtube.com/embed/uYPbbksJxIg",
+    cast: [
+      { name: "Cillian Murphy", role: "J. Robert Oppenheimer", photo: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=150&q=80" },
+      { name: "Emily Blunt", role: "Katherine Oppenheimer", photo: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80" },
+      { name: "Matt Damon", role: "Leslie Groves", photo: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=150&q=80" },
+      { name: "Robert Downey Jr.", role: "Lewis Strauss", photo: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=150&q=80" },
+    ],
+    director: "Christopher Nolan",
+    isTrending: true,
   },
   {
-    title: "Mountain Retreat",
-    description:
-      "Unplug and unwind in this peaceful mountain cabin. Surrounded by nature, it's a perfect place to recharge.",
-    image: {
-      filename: "listingimage",
-      url: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8aG90ZWxzfGVufDB8fDB8fHww&auto=format&fit=crop&w=800&q=60",
+    title: "Spider-Man: Across the Spider-Verse",
+    synopsis: "Miles Morales catapults across the Multiverse, where he encounters a team of Spider-People charged with protecting its very existence. When the heroes clash on how to handle a new threat, Miles must redefine what it means to be a hero.",
+    genre: ["Animation", "Action", "Adventure", "Sci-Fi"],
+    language: ["English", "Hindi", "Tamil", "Telugu"],
+    duration: 140,
+    rating: 8.7,
+    votesCount: 29500,
+    certificate: "U",
+    format: ["2D", "3D", "4DX"],
+    poster: {
+      url: "https://images.unsplash.com/photo-1635805737707-575885ab0820?auto=format&fit=crop&w=600&q=80",
+      filename: "spiderman_poster",
     },
-    price: 1000,
-    location: "Aspen",
-    country: "United States",
+    backdrop: {
+      url: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=1600&q=80",
+      filename: "spiderman_backdrop",
+    },
+    trailerUrl: "https://www.youtube.com/embed/cqGjhVJWtEg",
+    cast: [
+      { name: "Shameik Moore", role: "Miles Morales (voice)", photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80" },
+      { name: "Hailee Steinfeld", role: "Gwen Stacy (voice)", photo: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" },
+      { name: "Oscar Isaac", role: "Miguel O'Hara (voice)", photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80" },
+    ],
+    director: "Joaquim Dos Santos",
+    isTrending: true,
   },
   {
-    title: "Historic Villa in Tuscany",
-    description:
-      "Experience the charm of Tuscany in this beautifully restored villa. Explore the rolling hills and vineyards.",
-    image: {
-      filename: "listingimage",
-      url: "https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8aG90ZWxzfGVufDB8fDB8fHww&auto=format&fit=crop&w=800&q=60",
+    title: "Interstellar",
+    synopsis: "When Earth becomes uninhabitable in the future, a farmer and ex-NASA pilot, Joseph Cooper, is tasked to pilot a spacecraft, along with a team of researchers, to find a new planet for humans across a mysterious wormhole near Saturn.",
+    genre: ["Sci-Fi", "Drama", "Adventure"],
+    language: ["English", "Hindi"],
+    duration: 169,
+    rating: 8.9,
+    votesCount: 65100,
+    certificate: "UA",
+    format: ["2D", "IMAX 3D"],
+    poster: {
+      url: "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=600&q=80",
+      filename: "interstellar_poster",
     },
-    price: 2500,
-    location: "Florence",
-    country: "Italy",
+    backdrop: {
+      url: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1600&q=80",
+      filename: "interstellar_backdrop",
+    },
+    trailerUrl: "https://www.youtube.com/embed/zSWdZVtXT7E",
+    cast: [
+      { name: "Matthew McConaughey", role: "Cooper", photo: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=150&q=80" },
+      { name: "Anne Hathaway", role: "Brand", photo: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80" },
+      { name: "Jessica Chastain", role: "Murph", photo: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80" },
+    ],
+    director: "Christopher Nolan",
+    isTrending: true,
   },
   {
-    title: "Secluded Treehouse Getaway",
-    description:
-      "Live among the treetops in this unique treehouse retreat. A true nature lover's paradise.",
-    image: {
-      filename: "listingimage",
-      url: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTV8fGhvdGVsc3xlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=800&q=60",
+    title: "Jawan",
+    synopsis: "A high-octane action thriller which outlines the emotional journey of a man who is set to rectify the wrongs in the society, alongside a fearless prison warden whose mission intertwines with national conspiracies.",
+    genre: ["Action", "Thriller", "Drama"],
+    language: ["Hindi", "Tamil", "Telugu"],
+    duration: 169,
+    rating: 8.2,
+    votesCount: 42100,
+    certificate: "UA 16+",
+    format: ["2D", "4DX", "IMAX 3D"],
+    poster: {
+      url: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=600&q=80",
+      filename: "jawan_poster",
     },
-    price: 800,
-    location: "Portland",
-    country: "United States",
+    backdrop: {
+      url: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1600&q=80",
+      filename: "jawan_backdrop",
+    },
+    trailerUrl: "https://www.youtube.com/embed/MWOlnZSnXWY",
+    cast: [
+      { name: "Shah Rukh Khan", role: "Vikram Rathore / Azad", photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80" },
+      { name: "Nayanthara", role: "Narmada Rai", photo: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" },
+      { name: "Vijay Sethupathi", role: "Kalee Gaikwad", photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80" },
+    ],
+    director: "Atlee",
+    isTrending: false,
   },
   {
-    title: "Beachfront Paradise",
-    description:
-      "Step out of your door onto the sandy beach. This beachfront condo offers the ultimate relaxation.",
-    image: {
-      filename: "listingimage",
-      url: "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fGhvdGVsc3xlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=800&q=60",
+    title: "Fighter",
+    synopsis: "Top IAF aviators come together in the face of imminent danger to form an elite unit named Air Dragons, navigating personal demons and aerial skirmishes to protect the sovereignty of the nation.",
+    genre: ["Action", "Thriller"],
+    language: ["Hindi", "Telugu"],
+    duration: 166,
+    rating: 7.9,
+    votesCount: 18400,
+    certificate: "UA",
+    format: ["2D", "3D", "4DX"],
+    poster: {
+      url: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80",
+      filename: "fighter_poster",
     },
-    price: 2000,
-    location: "Cancun",
-    country: "Mexico",
-  },
-  {
-    title: "Rustic Cabin by the Lake",
-    description:
-      "Spend your days fishing and kayaking on the serene lake. This cozy cabin is perfect for outdoor enthusiasts.",
-    image: {
-      filename: "listingimage",
-      url: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fG1vdW50YWlufGVufDB8fDB8fHww&auto=format&fit=crop&w=800&q=60",
+    backdrop: {
+      url: "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1600&q=80",
+      filename: "fighter_backdrop",
     },
-    price: 900,
-    location: "Lake Tahoe",
-    country: "United States",
-  },
-  {
-    title: "Luxury Penthouse with City Views",
-    description:
-      "Indulge in luxury living with panoramic city views from this stunning penthouse apartment.",
-    image: {
-      filename: "listingimage",
-      url: "https://images.unsplash.com/photo-1622396481328-9b1b78cdd9fd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8c2t5JTIwdmFjYXRpb258ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=800&q=60",
-    },
-    price: 3500,
-    location: "Los Angeles",
-    country: "United States",
-  },
-  {
-    title: "Ski-In/Ski-Out Chalet",
-    description:
-      "Hit the slopes right from your doorstep in this ski-in/ski-out chalet in the Swiss Alps.",
-    image: {
-      filename: "listingimage",
-      url: "https://images.unsplash.com/photo-1502784444187-359ac186c5bb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fHNreSUyMHZhY2F0aW9ufGVufDB8fDB8fHww&auto=format&fit=crop&w=800&q=60",
-    },
-    price: 3000,
-    location: "Verbier",
-    country: "Switzerland",
-  },
-  {
-    title: "Safari Lodge in the Serengeti",
-    description:
-      "Experience the thrill of the wild in a comfortable safari lodge. Witness the Great Migration up close.",
-    image: {
-      filename: "listingimage",
-      url: "https://images.unsplash.com/photo-1493246507139-91e8fad9978e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mjl8fG1vdW50YWlufGVufDB8fDB8fHww&auto=format&fit=crop&w=800&q=60",
-    },
-    price: 4000,
-    location: "Serengeti National Park",
-    country: "Tanzania",
-  },
-  {
-    title: "Historic Canal House",
-    description:
-      "Stay in a piece of history in this beautifully preserved canal house in Amsterdam's iconic district.",
-    image: {
-      filename: "listingimage",
-      url: "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Y2FtcGluZ3xlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=800&q=60",
-    },
-    price: 1800,
-    location: "Amsterdam",
-    country: "Netherlands",
-  },
-  {
-    title: "Private Island Retreat",
-    description:
-      "Have an entire island to yourself for a truly exclusive and unforgettable vacation experience.",
-    image: {
-      filename: "listingimage",
-      url: "https://images.unsplash.com/photo-1618140052121-39fc6db33972?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bG9kZ2V8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=800&q=60",
-    },
-    price: 10000,
-    location: "Fiji",
-    country: "Fiji",
-  },
-  {
-    title: "Charming Cottage in the Cotswolds",
-    description:
-      "Escape to the picturesque Cotswolds in this quaint and charming cottage with a thatched roof.",
-    image: {
-      filename: "listingimage",
-      url: "https://images.unsplash.com/photo-1602088113235-229c19758e9f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8YmVhY2glMjB2YWNhdGlvbnxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=800&q=60",
-    },
-    price: 1200,
-    location: "Cotswolds",
-    country: "United Kingdom",
-  },
-  {
-    title: "Historic Brownstone in Boston",
-    description:
-      "Step back in time in this elegant historic brownstone located in the heart of Boston.",
-    image: {
-      filename: "listingimage",
-      url: "https://images.unsplash.com/photo-1533619239233-6280475a633a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fHNreSUyMHZhY2F0aW9ufGVufDB8fDB8fHww&auto=format&fit=crop&w=800&q=60",
-    },
-    price: 2200,
-    location: "Boston",
-    country: "United States",
-  },
-  {
-    title: "Beachfront Bungalow in Bali",
-    description:
-      "Relax on the sandy shores of Bali in this beautiful beachfront bungalow with a private pool.",
-    image: {
-      filename: "listingimage",
-      url: "https://images.unsplash.com/photo-1602391833977-358a52198938?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MzJ8fGNhbXBpbmd8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=800&q=60",
-    },
-    price: 1800,
-    location: "Bali",
-    country: "Indonesia",
-  },
-  {
-    title: "Mountain View Cabin in Banff",
-    description:
-      "Enjoy breathtaking mountain views from this cozy cabin in the Canadian Rockies.",
-    image: {
-      filename: "listingimage",
-      url: "https://images.unsplash.com/photo-1521401830884-6c03c1c87ebb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fGxvZGdlfGVufDB8fDB8fHww&auto=format&fit=crop&w=800&q=60",
-    },
-    price: 1500,
-    location: "Banff",
-    country: "Canada",
-  },
-  {
-    title: "Art Deco Apartment in Miami",
-    description:
-      "Step into the glamour of the 1920s in this stylish Art Deco apartment in South Beach.",
-    image: {
-      filename: "listingimage",
-      url: "https://plus.unsplash.com/premium_photo-1670963964797-942df1804579?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fGxvZGdlfGVufDB8fDB8fHww&auto=format&fit=crop&w=800&q=60",
-    },
-    price: 1600,
-    location: "Miami",
-    country: "United States",
-  },
-  {
-    title: "Tropical Villa in Phuket",
-    description:
-      "Escape to a tropical paradise in this luxurious villa with a private infinity pool in Phuket.",
-    image: {
-      filename: "listingimage",
-      url: "https://images.unsplash.com/photo-1470165301023-58dab8118cc9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTl8fGxvZGdlfGVufDB8fDB8fHww&auto=format&fit=crop&w=800&q=60",
-    },
-    price: 3000,
-    location: "Phuket",
-    country: "Thailand",
-  },
-  {
-    title: "Historic Castle in Scotland",
-    description:
-      "Live like royalty in this historic castle in the Scottish Highlands. Explore the rugged beauty of the area.",
-    image: {
-      filename: "listingimage",
-      url: "https://images.unsplash.com/photo-1585543805890-6051f7829f98?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTl8fGJlYWNoJTIwdmFjYXRpb258ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=800&q=60",
-    },
-    price: 4000,
-    location: "Scottish Highlands",
-    country: "United Kingdom",
-  },
-  {
-    title: "Desert Oasis in Dubai",
-    description:
-      "Experience luxury in the middle of the desert in this opulent oasis in Dubai with a private pool.",
-    image: {
-      filename: "listingimage",
-      url: "https://images.unsplash.com/photo-1518684079-3c830dcef090?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8ZHViYWl8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=800&q=60",
-    },
-    price: 5000,
-    location: "Dubai",
-    country: "United Arab Emirates",
-  },
-  {
-    title: "Rustic Log Cabin in Montana",
-    description:
-      "Unplug and unwind in this cozy log cabin surrounded by the natural beauty of Montana.",
-    image: {
-      filename: "listingimage",
-      url: "https://images.unsplash.com/photo-1586375300773-8384e3e4916f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTN8fGxvZGdlfGVufDB8fDB8fHww&auto=format&fit=crop&w=800&q=60",
-    },
-    price: 1100,
-    location: "Montana",
-    country: "United States",
-  },
-  {
-    title: "Beachfront Villa in Greece",
-    description:
-      "Enjoy the crystal-clear waters of the Mediterranean in this beautiful beachfront villa on a Greek island.",
-    image: {
-      filename: "listingimage",
-      url: "https://images.unsplash.com/photo-1602343168117-bb8ffe3e2e9f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8dmlsbGF8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=800&q=60",
-    },
-    price: 2500,
-    location: "Mykonos",
-    country: "Greece",
-  },
-  {
-    title: "Eco-Friendly Treehouse Retreat",
-    description:
-      "Stay in an eco-friendly treehouse nestled in the forest. It's the perfect escape for nature lovers.",
-    image: {
-      filename: "listingimage",
-      url: "https://images.unsplash.com/photo-1488462237308-ecaa28b729d7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8c2t5JTIwdmFjYXRpb258ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=800&q=60",
-    },
-    price: 750,
-    location: "Costa Rica",
-    country: "Costa Rica",
-  },
-  {
-    title: "Historic Cottage in Charleston",
-    description:
-      "Experience the charm of historic Charleston in this beautifully restored cottage with a private garden.",
-    image: {
-      filename: "listingimage",
-      url: "https://images.unsplash.com/photo-1587381420270-3e1a5b9e6904?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fGxvZGdlfGVufDB8fDB8fHww&auto=format&fit=crop&w=800&q=60",
-    },
-    price: 1600,
-    location: "Charleston",
-    country: "United States",
-  },
-  {
-    title: "Modern Apartment in Tokyo",
-    description:
-      "Explore the vibrant city of Tokyo from this modern and centrally located apartment.",
-    image: {
-      filename: "listingimage",
-      url: "https://images.unsplash.com/photo-1480796927426-f609979314bd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTV8fHRva3lvfGVufDB8fDB8fHww&auto=format&fit=crop&w=800&q=60",
-    },
-    price: 2000,
-    location: "Tokyo",
-    country: "Japan",
-  },
-  {
-    title: "Lakefront Cabin in New Hampshire",
-    description:
-      "Spend your days by the lake in this cozy cabin in the scenic White Mountains of New Hampshire.",
-    image: {
-      filename: "listingimage",
-      url: "https://images.unsplash.com/photo-1578645510447-e20b4311e3ce?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NDF8fGNhbXBpbmd8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=800&q=60",
-    },
-    price: 1200,
-    location: "New Hampshire",
-    country: "United States",
-  },
-  {
-    title: "Luxury Villa in the Maldives",
-    description:
-      "Indulge in luxury in this overwater villa in the Maldives with stunning views of the Indian Ocean.",
-    image: {
-      filename: "listingimage",
-      url: "https://images.unsplash.com/photo-1439066615861-d1af74d74000?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bGFrZXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=800&q=60",
-    },
-    price: 6000,
-    location: "Maldives",
-    country: "Maldives",
-  },
-  {
-    title: "Ski Chalet in Aspen",
-    description:
-      "Hit the slopes in style with this luxurious ski chalet in the world-famous Aspen ski resort.",
-    image: {
-      filename: "listingimage",
-      url: "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fGxha2V8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=800&q=60",
-    },
-    price: 4000,
-    location: "Aspen",
-    country: "United States",
-  },
-  {
-    title: "Secluded Beach House in Costa Rica",
-    description:
-      "Escape to a secluded beach house on the Pacific coast of Costa Rica. Surf, relax, and unwind.",
-    image: {
-      filename: "listingimage",
-      url: "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YmVhY2glMjBob3VzZXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=800&q=60",
-    },
-    price: 1800,
-    location: "Costa Rica",
-    country: "Costa Rica",
+    trailerUrl: "https://www.youtube.com/embed/9msG_u2r5q8",
+    cast: [
+      { name: "Hrithik Roshan", role: "Shamsher Pathania (Patty)", photo: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=150&q=80" },
+      { name: "Deepika Padukone", role: "Minal Rathore (Minni)", photo: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80" },
+      { name: "Anil Kapoor", role: "Rakesh Jaisingh (Rocky)", photo: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=150&q=80" },
+    ],
+    director: "Siddharth Anand",
+    isTrending: false,
   },
 ];
 
-module.exports = { data: sampleListings };
+const sampleTheatres = [
+  {
+    name: "PVR: INOX Megaplex, Phoenix Palladium",
+    chain: "PVR",
+    city: "Mumbai",
+    address: "462, Senapati Bapat Marg, Lower Parel, Mumbai",
+    location: { type: "Point", coordinates: [72.8258, 18.9986] },
+    amenities: ["IMAX Laser", "Dolby Atmos 7.1", "Recliner Seats", "Gourmet F&B", "Wheelchair Accessible"],
+    cancellationAvailable: true,
+  },
+  {
+    name: "Cinepolis: Viviana Mall",
+    chain: "Cinepolis",
+    city: "Mumbai",
+    address: "Eastern Express Highway, Near Jupiter Hospital, Thane, Mumbai",
+    location: { type: "Point", coordinates: [72.9734, 19.2084] },
+    amenities: ["4DX", "Dolby Atmos", "Recliner Seats", "VIP Lounge"],
+    cancellationAvailable: true,
+  },
+  {
+    name: "PVR: Director's Cut, Ambience Mall",
+    chain: "PVR",
+    city: "Delhi-NCR",
+    address: "Ambience Mall, NH 8, Gurugram, Delhi-NCR",
+    location: { type: "Point", coordinates: [77.097, 28.504] },
+    amenities: ["IMAX Laser", "Luxury Dine-in", "Ultra Recliner", "Valet Parking"],
+    cancellationAvailable: true,
+  },
+  {
+    name: "INOX: Insignia, Epicuria",
+    chain: "INOX",
+    city: "Delhi-NCR",
+    address: "Nehru Place Metro Station, Epicuria, New Delhi",
+    location: { type: "Point", coordinates: [77.2514, 28.551] },
+    amenities: ["Dolby 7.1", "Gourmet Concessions", "Recliners"],
+    cancellationAvailable: true,
+  },
+  {
+    name: "PVR: Forum Mall, Koramangala",
+    chain: "PVR",
+    city: "Bengaluru",
+    address: "Hosur Road, Chikku Lakshmaiah Layout, Koramangala, Bengaluru",
+    location: { type: "Point", coordinates: [77.6111, 12.9345] },
+    amenities: ["IMAX 3D", "Dolby Atmos", "Food Court"],
+    cancellationAvailable: true,
+  },
+  {
+    name: "Cinepolis: Forum Sujana Mall",
+    chain: "Cinepolis",
+    city: "Hyderabad",
+    address: "Kukatpally Housing Board Colony, Hyderabad",
+    location: { type: "Point", coordinates: [78.3871, 17.4852] },
+    amenities: ["Dolby Atmos", "Recliner", "4DX"],
+    cancellationAvailable: true,
+  },
+];
+
+module.exports = {
+  sampleMovies,
+  sampleTheatres,
+};

@@ -1,11 +1,12 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const passportLocalMongoose = require("passport-local-mongoose").default;
+const passportLocalMongoose = require("passport-local-mongoose");
 
 const userSchema = new Schema({
   email: {
     type: String,
     required: true,
+    unique: true,
   },
   phone: {
     type: String,
@@ -13,25 +14,25 @@ const userSchema = new Schema({
   },
   role: {
     type: String,
-    enum: ["traveller", "owner"],
-    default: "traveller",
+    enum: ["user", "admin"],
+    default: "user",
   },
-  isEmailVerified: {
-    type: Boolean,
-    default: false,
-  },
-  isPhoneVerified: {
-    type: Boolean,
-    default: false,
-  },
-  wishlist: [
+  watchlist: [
     {
       type: Schema.Types.ObjectId,
-      ref: "Listing",
-    }
+      ref: "Movie",
+    },
   ],
+  avatar: {
+    type: String,
+    default: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
-userSchema.plugin(passportLocalMongoose);
+userSchema.plugin(passportLocalMongoose.default || passportLocalMongoose);
 
 module.exports = mongoose.model("User", userSchema);

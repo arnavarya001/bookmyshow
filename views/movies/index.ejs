@@ -1,0 +1,162 @@
+<% layout("/layouts/boilerplate") %>
+
+<!-- Hero Spotlight Carousel for Trending Blockbusters -->
+<% if (trendingMovies && trendingMovies.length > 0) { %>
+  <div id="heroSpotlightCarousel" class="carousel slide carousel-fade mb-5" data-bs-ride="carousel" data-bs-interval="5000">
+    <div class="carousel-inner" style="border-radius: 20px;">
+      <% trendingMovies.forEach((m, idx) => { %>
+        <div class="carousel-item <%= idx === 0 ? 'active' : '' %>">
+          <div class="bms-hero-banner position-relative">
+            <img src="<%= m.backdrop.url %>" alt="<%= m.title %>">
+            <div class="bms-hero-gradient"></div>
+            <div class="bms-hero-content">
+              <span class="badge bg-danger mb-2 px-3 py-1 text-uppercase fw-bold" style="letter-spacing: 1px; font-size: 0.75rem;">
+                <i class="fa-solid fa-fire me-1"></i> Trending #<%= idx + 1 %>
+              </span>
+              <h1 class="display-4 fw-black text-white mb-2" style="font-weight: 800;"><%= m.title %></h1>
+              <div class="d-flex align-items-center gap-3 text-white-50 mb-3 flex-wrap">
+                <span class="text-warning fw-bold"><i class="fa-solid fa-star me-1"></i><%= m.rating %>/10</span>
+                <span>•</span>
+                <span><%= m.certificate %></span>
+                <span>•</span>
+                <span><%= Math.floor(m.duration / 60) %>h <%= m.duration % 60 %>m</span>
+                <span>•</span>
+                <span><%= m.language.join(", ") %></span>
+              </div>
+              <p class="text-light opacity-75 mb-4 d-none d-md-block" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                <%= m.synopsis %>
+              </p>
+              <div class="d-flex align-items-center gap-3">
+                <a href="/shows/movie/<%= m._id %>?city=<%= selectedCity %>" class="btn btn-bms px-4 py-2">
+                  <i class="fa-solid fa-ticket me-2"></i>Book Tickets
+                </a>
+                <a href="/movies/<%= m._id %>" class="btn btn-bms-dark px-4 py-2">
+                  <i class="fa-solid fa-circle-info me-2"></i>More Info
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#heroSpotlightCarousel" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#heroSpotlightCarousel" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    </button>
+  </div>
+<% } %>
+
+<!-- Filter Controls -->
+<div class="d-flex flex-column gap-3 mb-4">
+  <!-- Genre Filters -->
+  <div class="d-flex align-items-center gap-2">
+    <span class="text-muted small fw-bold text-uppercase me-2"><i class="fa-solid fa-film me-1"></i>Genre:</span>
+    <div class="bms-filter-scroll flex-grow-1">
+      <a href="/movies?genre=All&language=<%= selectedLanguage %>&city=<%= selectedCity %>" 
+         class="bms-filter-pill <%= selectedGenre === 'All' ? 'active' : '' %>">
+        All Genres
+      </a>
+      <% allGenres.forEach(g => { %>
+        <a href="/movies?genre=<%= encodeURIComponent(g) %>&language=<%= selectedLanguage %>&city=<%= selectedCity %>" 
+           class="bms-filter-pill <%= selectedGenre === g ? 'active' : '' %>">
+          <%= g %>
+        </a>
+      <% }); %>
+    </div>
+  </div>
+
+  <!-- Language Filters -->
+  <div class="d-flex align-items-center gap-2">
+    <span class="text-muted small fw-bold text-uppercase me-2"><i class="fa-solid fa-language me-1"></i>Language:</span>
+    <div class="bms-filter-scroll flex-grow-1">
+      <a href="/movies?language=All&genre=<%= selectedGenre %>&city=<%= selectedCity %>" 
+         class="bms-filter-pill <%= selectedLanguage === 'All' ? 'active' : '' %>">
+        All Languages
+      </a>
+      <% allLanguages.forEach(l => { %>
+        <a href="/movies?language=<%= encodeURIComponent(l) %>&genre=<%= selectedGenre %>&city=<%= selectedCity %>" 
+           class="bms-filter-pill <%= selectedLanguage === l ? 'active' : '' %>">
+          <%= l %>
+        </a>
+      <% }); %>
+    </div>
+  </div>
+</div>
+
+<!-- Movies Section Header -->
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div>
+    <h2 class="h3 fw-bold text-white mb-1">Movies in <%= selectedCity %></h2>
+    <p class="text-muted small mb-0">Discover top releases, blockbusters & indie favorites</p>
+  </div>
+  <div class="dropdown">
+    <button class="btn btn-bms-dark btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+      Sort By
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark">
+      <li><a class="dropdown-item" href="/movies?sort=release">Release Date</a></li>
+      <li><a class="dropdown-item" href="/movies?sort=rating">Top Rated</a></li>
+      <li><a class="dropdown-item" href="/movies?sort=popularity">Most Popular</a></li>
+    </ul>
+  </div>
+</div>
+
+<!-- Movie Grid -->
+<% if (movies && movies.length > 0) { %>
+  <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-4">
+    <% movies.forEach(movie => { %>
+      <div class="col">
+        <div class="movie-card">
+          <!-- Watchlist Heart Button -->
+          <button class="movie-watchlist-btn <%= watchlistIds.includes(movie._id.toString()) ? 'active' : '' %>" 
+                  data-movie-id="<%= movie._id %>" 
+                  title="Add to Watchlist">
+            <i class="<%= watchlistIds.includes(movie._id.toString()) ? 'fa-solid text-danger' : 'fa-regular' %> fa-heart"></i>
+          </button>
+
+          <!-- Poster with Rating Overlay -->
+          <a href="/movies/<%= movie._id %>" class="movie-poster-wrap">
+            <img src="<%= movie.poster.url %>" alt="<%= movie.title %>" loading="lazy">
+            <div class="movie-rating-badge">
+              <span class="star-score">
+                <i class="fa-solid fa-star"></i> <%= movie.rating %>/10
+              </span>
+              <span class="small text-white-50"><%= movie.votesCount.toLocaleString("en-IN") %> votes</span>
+            </div>
+          </a>
+
+          <!-- Details -->
+          <div class="movie-card-info">
+            <a href="/movies/<%= movie._id %>" class="movie-card-title" title="<%= movie.title %>">
+              <%= movie.title %>
+            </a>
+            <div class="movie-card-genres">
+              <%= movie.genre.join(", ") %>
+            </div>
+            <div class="d-flex align-items-center justify-content-between mt-auto pt-2">
+              <div>
+                <% if (movie.format && movie.format.length) { %>
+                  <% movie.format.slice(0, 2).forEach(f => { %>
+                    <span class="movie-format-pill"><%= f %></span>
+                  <% }); %>
+                <% } %>
+              </div>
+              <a href="/shows/movie/<%= movie._id %>?city=<%= selectedCity %>" class="btn btn-bms btn-sm py-1 px-3">
+                Book
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% }); %>
+  </div>
+<% } else { %>
+  <div class="text-center py-5 my-5">
+    <i class="fa-solid fa-film-slash text-muted fs-1 mb-3"></i>
+    <h4 class="text-white">No movies found</h4>
+    <p class="text-muted">Try resetting your filters or selecting a different genre/language.</p>
+    <a href="/movies" class="btn btn-bms mt-2">Clear Filters</a>
+  </div>
+<% } %>

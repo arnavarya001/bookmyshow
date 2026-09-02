@@ -1,21 +1,22 @@
 const express = require("express");
 const router = express.Router();
-const { isLoggedIn } = require("../middleware");
+const wrapAsync = require("../utils/wrapAsync");
+const { isLoggedIn } = require("../utils/auth");
 const bookingController = require("../controllers/booking");
 
-// Booking form — date selection
-router.get("/:id/book", isLoggedIn, bookingController.renderNewForm);
+// Step 1: Submit chosen seats & snacks, render payment review page
+router.post("/checkout", isLoggedIn, wrapAsync(bookingController.initiateBooking));
 
-// Date submit — create Razorpay order
-router.post("/:id/book", isLoggedIn, bookingController.createBooking);
+// Step 2: Confirm Payment & Issue Ticket
+router.post("/verify-payment", isLoggedIn, wrapAsync(bookingController.verifyPayment));
 
-// ✅ Verify payment — save booking to DB
-router.post("/verify-payment", isLoggedIn, bookingController.verifyPayment);
+// Step 3: View Digital Ticket
+router.get("/ticket/:id", isLoggedIn, wrapAsync(bookingController.viewTicket));
 
-// Booking history
-router.get("/history", isLoggedIn, bookingController.bookingHistory);
+// Booking History
+router.get("/history", isLoggedIn, wrapAsync(bookingController.bookingHistory));
 
-// Cancel booking
-router.delete("/:bookingId", isLoggedIn, bookingController.cancelBooking);
+// Cancel Ticket
+router.post("/:id/cancel", isLoggedIn, wrapAsync(bookingController.cancelBooking));
 
 module.exports = router;

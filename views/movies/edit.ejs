@@ -1,0 +1,98 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="row justify-content-center my-4">
+  <div class="col-lg-8">
+    <div class="bms-auth-card">
+      <h2 class="fw-bold text-white mb-4"><i class="fa-solid fa-pen-to-square text-danger me-2"></i>Edit Movie: <%= movie.title %></h2>
+      <form action="/movies/<%= movie._id %>?_method=PUT" method="POST" enctype="multipart/form-data">
+        <div class="row g-3">
+          <!-- Title -->
+          <div class="col-md-8">
+            <label class="form-label text-white fw-bold">Movie Title *</label>
+            <input type="text" name="movie[title]" class="form-control form-control-bms" value="<%= movie.title %>" required>
+          </div>
+          <!-- Certificate -->
+          <div class="col-md-4">
+            <label class="form-label text-white fw-bold">Certificate</label>
+            <select name="movie[certificate]" class="form-select form-control-bms">
+              <option value="U" <%= movie.certificate === 'U' ? 'selected' : '' %>>U (Universal)</option>
+              <option value="UA" <%= movie.certificate === 'UA' ? 'selected' : '' %>>UA (Parental Guidance)</option>
+              <option value="UA 16+" <%= movie.certificate === 'UA 16+' ? 'selected' : '' %>>UA 16+</option>
+              <option value="A" <%= movie.certificate === 'A' ? 'selected' : '' %>>A (Adults Only)</option>
+            </select>
+          </div>
+
+          <!-- Synopsis -->
+          <div class="col-12">
+            <label class="form-label text-white fw-bold">Synopsis / Storyline *</label>
+            <textarea name="movie[synopsis]" rows="3" class="form-control form-control-bms" required><%= movie.synopsis %></textarea>
+          </div>
+
+          <!-- Duration & Rating -->
+          <div class="col-md-6">
+            <label class="form-label text-white fw-bold">Duration (in minutes) *</label>
+            <input type="number" name="movie[duration]" class="form-control form-control-bms" value="<%= movie.duration %>" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label text-white fw-bold">Rating (out of 10)</label>
+            <input type="number" step="0.1" name="movie[rating]" class="form-control form-control-bms" value="<%= movie.rating %>">
+          </div>
+
+          <!-- Genres & Languages (Comma separated) -->
+          <div class="col-md-6">
+            <label class="form-label text-white fw-bold">Genres (comma-separated) *</label>
+            <input type="text" name="movie[genre]" class="form-control form-control-bms" value="<%= movie.genre.join(', ') %>" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label text-white fw-bold">Languages (comma-separated) *</label>
+            <input type="text" name="movie[language]" class="form-control form-control-bms" value="<%= movie.language.join(', ') %>" required>
+          </div>
+
+          <!-- Formats (Comma separated) -->
+          <div class="col-md-6">
+            <label class="form-label text-white fw-bold">Formats (comma-separated)</label>
+            <input type="text" name="movie[format]" class="form-control form-control-bms" value="<%= movie.format.join(', ') %>">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label text-white fw-bold">Director</label>
+            <input type="text" name="movie[director]" class="form-control form-control-bms" value="<%= movie.director %>">
+          </div>
+
+          <!-- Trailer URL -->
+          <div class="col-12">
+            <label class="form-label text-white fw-bold">Trailer Embed URL</label>
+            <input type="url" name="movie[trailerUrl]" class="form-control form-control-bms" value="<%= movie.trailerUrl %>">
+          </div>
+
+          <!-- Replace Poster Image -->
+          <div class="col-md-6">
+            <label class="form-label text-white fw-bold">Update Poster Image</label>
+            <input type="file" name="poster" class="form-control form-control-bms">
+            <small class="text-muted">Current: <a href="<%= movie.poster.url %>" target="_blank" class="text-danger">View Image</a></small>
+          </div>
+
+          <!-- Replace Backdrop Banner -->
+          <div class="col-md-6">
+            <label class="form-label text-white fw-bold">Update Backdrop Image</label>
+            <input type="file" name="backdrop" class="form-control form-control-bms">
+            <small class="text-muted">Current: <a href="<%= movie.backdrop.url %>" target="_blank" class="text-danger">View Image</a></small>
+          </div>
+
+          <!-- Trending Switch -->
+          <div class="col-12">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" name="movie[isTrending]" id="isTrendingSwitch" value="true" <%= movie.isTrending ? 'checked' : '' %>>
+              <label class="form-check-label text-white" for="isTrendingSwitch">Feature in Top Trending Banner Carousel</label>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="col-12 mt-4 d-flex justify-content-end gap-3">
+            <a href="/movies/<%= movie._id %>" class="btn btn-bms-dark">Cancel</a>
+            <button type="submit" class="btn btn-bms px-4">Update Movie</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

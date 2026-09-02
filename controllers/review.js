@@ -1,37 +1,55 @@
-const Listing = require("../models/listing");
 const Review = require("../models/review");
+const Movie = require("../models/movie");
 
-//  CREATE Review
-module.exports.createReview = async (req, res) => {
-  const listing = await Listing.findById(req.params.id);
+// POST /movies/:id/reviews - Add Review
+module.exports.addReview = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const movie = await Movie.findById(id).populate("reviews");
 
-  if (!listing) {
-    req.flash("error", "Listing not found!");
-    return res.redirect("/listings");
+    if (!movie) {
+      req.flash("error", "Movie not found!");
+      return res.redirect("/movies");
+    }
+
+    const { rating, comment } = req.body.review;
+    const newReview = new Review({
+      rating: Number(rating),
+      comment,
+      movie: id,
+      author: req.user._id,
+    });
+
+    await newReview.save();
+    movie.reviews.push(newReview._id);
+
+    // Update average rating & vote count
+    const totalVotes = movie.votesCount + 1;
+    const currentSum = (movie.rating || 8) * movie.votesCount;
+    const newAvg = (currentSum + Number(rating)) / totalVotes;
+
+    movie.rating = Math.round(newAvg * 10) / 10;
+    movie.votesCount = totalVotes;
+    await movie.save();
+
+    req.flash("success", "Your review and rating have been posted!");
+    return res.redirect(`/movies/${id}`);
+  } catch (err) {
+    return next(err);
   }
-
-  const newReview = new Review(req.body.review);
-  newReview.author = req.user._id;
-
-  await newReview.save();
-
-  listing.reviews.push(newReview._id);
-  await listing.save();
-
-  req.flash("success", "Review Added!");
-  return res.redirect(`/listings/${listing._id}`);
 };
 
-//  DELETE Review 
-module.exports.deleteReview = async (req, res) => {
-  const { id, reviewId } = req.params;
+// DELETE /movies/:id/reviews/:reviewId - Delete Review
+module.exports.deleteReview = async (req, res, next) => {
+  try {
+    const { id, reviewId } = req.params;
 
-  await Listing.findByIdAndUpdate(id, {
-    $pull: { reviews: reviewId }
-  });
+    await Movie.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
+    await Review.findByIdAndDelete(reviewId);
 
-  await Review.findByIdAndDelete(reviewId);
-
-  req.flash("success", "Review Deleted!");
-  return res.redirect(`/listings/${id}`);
+    req.flash("success", "Review deleted successfully!");
+    return res.redirect(`/movies/${id}`);
+  } catch (err) {
+    return next(err);
+  }
 };

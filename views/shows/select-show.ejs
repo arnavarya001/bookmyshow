@@ -1,0 +1,122 @@
+<% layout("/layouts/boilerplate") %>
+
+<!-- Header with Movie Snapshot -->
+<div class="p-4 rounded-4 mb-4" style="background: #141722; border: 1px solid rgba(255,255,255,0.08);">
+  <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+    <div class="d-flex align-items-center gap-3">
+      <img src="<%= movie.poster.url %>" alt="<%= movie.title %>" class="rounded-3 shadow" style="width: 60px; height: 90px; object-fit: cover;">
+      <div>
+        <h2 class="h3 fw-bold text-white mb-1"><%= movie.title %></h2>
+        <div class="d-flex align-items-center gap-2 text-muted small flex-wrap">
+          <span class="badge bg-secondary text-uppercase"><%= movie.certificate %></span>
+          <span><%= movie.genre.join(", ") %></span>
+          <span>•</span>
+          <span><%= Math.floor(movie.duration / 60) %>h <%= movie.duration % 60 %>m</span>
+          <span>•</span>
+          <span><%= movie.language.join(", ") %></span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <a href="/movies/<%= movie._id %>" class="btn btn-bms-dark btn-sm">
+        <i class="fa-solid fa-arrow-left me-1"></i>Movie Details
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Date Selector Tabs -->
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4 pb-3 border-bottom border-secondary">
+  <div class="d-flex gap-2 overflow-x-auto pb-2 scrollbar-none flex-grow-1">
+    <% dateTabs.forEach(tab => { %>
+      <a href="/shows/movie/<%= movie._id %>?date=<%= tab.dateStr %>&city=<%= selectedCity %>" 
+         class="text-center px-3 py-2 rounded-3 text-decoration-none transition-all"
+         style="min-width: 80px; background: <%= selectedDateStr === tab.dateStr ? '#F84464' : '#1C202B' %>; 
+                color: <%= selectedDateStr === tab.dateStr ? '#FFFFFF' : '#CBD5E1' %>;
+                border: 1px solid <%= selectedDateStr === tab.dateStr ? '#F84464' : 'rgba(255,255,255,0.08)' %>;
+                box-shadow: <%= selectedDateStr === tab.dateStr ? '0 4px 14px rgba(248,68,100,0.4)' : 'none' %>;">
+        <span class="d-block text-uppercase fw-bold" style="font-size: 0.72rem; letter-spacing: 0.5px;"><%= tab.dayName %></span>
+        <span class="d-block fw-bolder fs-4"><%= tab.dateNum %></span>
+        <span class="d-block small" style="font-size: 0.75rem;"><%= tab.monthName %></span>
+      </a>
+    <% }); %>
+  </div>
+
+  <!-- City Filter -->
+  <div class="dropdown">
+    <button class="btn btn-bms-dark dropdown-toggle btn-sm d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown">
+      <i class="fa-solid fa-location-dot text-danger"></i> <%= selectedCity %>
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark">
+      <% cities.forEach(c => { %>
+        <li>
+          <a class="dropdown-item <%= selectedCity === c ? 'active' : '' %>" href="/shows/movie/<%= movie._id %>?date=<%= selectedDateStr %>&city=<%= c %>">
+            <%= c %>
+          </a>
+        </li>
+      <% }); %>
+    </ul>
+  </div>
+</div>
+
+<!-- Cinema Schedules List -->
+<% if (cinemaSchedules && cinemaSchedules.length > 0) { %>
+  <div class="d-flex flex-column gap-4 mb-5">
+    <% cinemaSchedules.forEach(item => { %>
+      <div class="p-4 rounded-4" style="background: #141722; border: 1px solid rgba(255,255,255,0.08);">
+        <div class="row align-items-center">
+          <!-- Cinema Details -->
+          <div class="col-lg-4 mb-3 mb-lg-0">
+            <div class="d-flex align-items-center gap-2">
+              <i class="fa-solid fa-heart text-muted small"></i>
+              <h5 class="fw-bold text-white mb-0"><%= item.theatre.name %></h5>
+            </div>
+            <small class="text-muted d-block mt-1"><%= item.theatre.address %></small>
+            
+            <div class="d-flex gap-3 mt-2">
+              <span class="small text-success"><i class="fa-solid fa-mobile-screen me-1"></i>M-Ticket</span>
+              <span class="small text-warning"><i class="fa-solid fa-burger me-1"></i>F&B</span>
+              <% if (item.theatre.cancellationAvailable) { %>
+                <span class="small text-info"><i class="fa-solid fa-rotate-left me-1"></i>Cancellation Available</span>
+              <% } %>
+            </div>
+          </div>
+
+          <!-- Showtimes -->
+          <div class="col-lg-8">
+            <div class="d-flex flex-wrap gap-3">
+              <% item.shows.forEach(show => { %>
+                <div class="position-relative">
+                  <a href="/shows/<%= show._id %>/seats" 
+                     class="btn text-start p-2 px-3 rounded-3"
+                     style="background: #1F2432; border: 1px solid rgba(255,255,255,0.1); color: #00E676; min-width: 110px;"
+                     onmouseover="this.style.background='#2A3144'; this.style.borderColor='#00E676';"
+                     onmouseout="this.style.background='#1F2432'; this.style.borderColor='rgba(255,255,255,0.1)';">
+                    <div class="fw-bold fs-6"><%= show.showTime %></div>
+                    <div class="d-flex justify-content-between align-items-center text-muted" style="font-size: 0.72rem;">
+                      <span><%= show.format %></span>
+                      <span class="text-white-50">₹<%= show.priceTiers.prime %></span>
+                    </div>
+                  </a>
+                </div>
+              <% }); %>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% }); %>
+  </div>
+<% } else { %>
+  <div class="text-center py-5 my-5 rounded-4 p-5" style="background: #141722; border: 1px dashed rgba(255,255,255,0.1);">
+    <i class="fa-solid fa-calendar-xmark text-muted fs-1 mb-3"></i>
+    <h4 class="text-white">No showtimes scheduled for this date</h4>
+    <p class="text-muted">Please choose another day or change the city location above.</p>
+  </div>
+<% } %>
+
+<!-- Legends Info -->
+<div class="p-3 rounded-3 mt-4 d-flex justify-content-center gap-4 text-muted small flex-wrap" style="background: #0E1017;">
+  <span class="d-flex align-items-center gap-2"><span class="rounded-circle" style="width: 10px; height: 10px; background: #00E676;"></span> Available</span>
+  <span class="d-flex align-items-center gap-2"><span class="rounded-circle" style="width: 10px; height: 10px; background: #FF9800;"></span> Filling Fast</span>
+  <span class="d-flex align-items-center gap-2"><span class="rounded-circle" style="width: 10px; height: 10px; background: #F44336;"></span> Almost Full</span>
+</div>

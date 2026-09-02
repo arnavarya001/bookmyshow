@@ -1,0 +1,72 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="mb-4">
+  <h2 class="fw-bold text-white mb-1">
+    Search Results for "<span class="text-danger"><%= q %></span>"
+  </h2>
+  <p class="text-muted"><%= movies.length %> movie(s) matched your query</p>
+</div>
+
+<% if (movies && movies.length > 0) { %>
+  <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-4 mb-5">
+    <% movies.forEach(movie => { %>
+      <div class="col">
+        <div class="movie-card">
+          <a href="/movies/<%= movie._id %>" class="movie-poster-wrap">
+            <img src="<%= movie.poster.url %>" alt="<%= movie.title %>">
+            <div class="movie-rating-badge">
+              <span class="star-score">
+                <i class="fa-solid fa-star"></i> <%= movie.rating %>/10
+              </span>
+              <span class="small text-white-50"><%= movie.votesCount.toLocaleString("en-IN") %> votes</span>
+            </div>
+          </a>
+
+          <div class="movie-card-info">
+            <a href="/movies/<%= movie._id %>" class="movie-card-title">
+              <%= movie.title %>
+            </a>
+            <div class="movie-card-genres">
+              <%= movie.genre.join(", ") %>
+            </div>
+            <div class="d-flex align-items-center justify-content-between mt-auto pt-2">
+              <span class="text-muted small"><%= movie.language[0] %></span>
+              <a href="/shows/movie/<%= movie._id %>" class="btn btn-bms btn-sm py-1 px-3">
+                Book
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% }); %>
+  </div>
+<% } else { %>
+  <div class="text-center py-5 my-5 bg-dark rounded-4 border border-secondary p-5">
+    <i class="fa-solid fa-magnifying-glass fs-1 text-muted mb-3"></i>
+    <h4 class="text-white">No exact matches found for "<%= q %>"</h4>
+    <p class="text-muted">Check your spelling or explore the trending recommendations below.</p>
+    <a href="/movies" class="btn btn-bms mt-2">Explore All Movies</a>
+  </div>
+<% } %>
+
+<!-- Recommended Movies -->
+<% if (related && related.length > 0) { %>
+  <div class="mt-5 pt-4 border-top border-secondary">
+    <h4 class="fw-bold text-white mb-4">You Might Also Like</h4>
+    <div class="row row-cols-2 row-cols-sm-4 g-4">
+      <% related.forEach(movie => { %>
+        <div class="col">
+          <div class="movie-card">
+            <a href="/movies/<%= movie._id %>" class="movie-poster-wrap">
+              <img src="<%= movie.poster.url %>" alt="<%= movie.title %>">
+            </a>
+            <div class="movie-card-info">
+              <a href="/movies/<%= movie._id %>" class="movie-card-title"><%= movie.title %></a>
+              <small class="text-muted"><%= movie.genre.join(", ") %></small>
+            </div>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+<% } %>

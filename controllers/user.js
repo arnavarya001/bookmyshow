@@ -1,46 +1,93 @@
-const User = require("../models/user.js");
+const User = require("../models/user");
+const Movie = require("../models/movie");
 
-// SIGNUP 
+// Render Signup Form
 module.exports.renderSignupForm = (req, res) => {
-  return res.render("users/signup.ejs");
+  return res.render("users/signup");
 };
 
+// Process Signup
 module.exports.signup = async (req, res, next) => {
   try {
-    let { username, email, password } = req.body;
+    const { username, email, phone, password, role } = req.body;
 
-    const newUser = new User({ email, username });
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
+      req.flash("error", "An account with this email already exists!");
+      return res.redirect("/signup");
+    }
+
+    const newUser = new User({
+      username,
+      email,
+      phone,
+      role: role === "admin" ? "admin" : "user",
+    });
+
     const registeredUser = await User.register(newUser, password);
 
     req.login(registeredUser, (err) => {
       if (err) return next(err);
-
-      req.flash("success", "Welcome to Wanderlust!");
-      return res.redirect("/listings");
+      req.flash("success", `Welcome to BookMyShow, ${registeredUser.username}! 🎉`);
+      return res.redirect("/movies");
     });
-
-  } catch (e) {
-    req.flash("error", e.message);
+  } catch (err) {
+    req.flash("error", err.message);
     return res.redirect("/signup");
   }
 };
 
-// ================= LOGIN =================
+// Render Login Form
 module.exports.renderLoginForm = (req, res) => {
-  return res.render("users/login.ejs");
+  return res.render("users/login");
 };
 
-module.exports.login = async (req, res) => {
-  req.flash("success", "Welcome back!");
-  return res.redirect("/listings");
+// Process Login
+module.exports.login = (req, res) => {
+  req.flash("success", `Welcome back, ${req.user.username}!`);
+  const redirectUrl = res.locals.redirectUrl || "/movies";
+  return res.redirect(redirectUrl);
 };
 
-//  LOGOUT 
+// Process Logout
 module.exports.logout = (req, res, next) => {
   req.logout((err) => {
     if (err) return next(err);
-
-    req.flash("success", "Logged out!");
-    return res.redirect("/listings");
+    req.flash("success", "You have been logged out successfully!");
+    return res.redirect("/movies");
   });
+};
+
+// Toggle Movie Watchlist (AJAX or form)
+module.exports.toggleWatchlist = async (req, res) => {
+  try {
+    const { movieId } = req.params;
+    const user = await User.findById(req.user._id);
+
+    const index = user.watchlist.findIndex((id) => id.toString() === movieId);
+    let status = "added";
+
+    if (index > -1) {
+      user.watchlist.splice(index, 1);
+      status = "removed";
+    } else {
+      user.watchlist.push(movieId);
+      status = "added";
+    }
+
+    await user.save();
+    return res.json({ status, count: user.watchlist.length });
+  } catch (err) {
+    return res.status(500).json({ error: "Could not update watchlist" });
+  }
+};
+
+// View Watchlist
+module.exports.getWatchlist = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id).populate("watchlist");
+    return res.render("watchlist/index", { watchlist: user.watchlist || [] });
+  } catch (err) {
+    return next(err);
+  }
 };

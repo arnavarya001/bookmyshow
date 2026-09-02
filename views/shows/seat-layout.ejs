@@ -1,0 +1,163 @@
+<% layout("/layouts/boilerplate") %>
+
+<!-- Header with Show Information -->
+<div class="p-3 px-4 rounded-4 mb-3 d-flex align-items-center justify-content-between flex-wrap gap-3" style="background: #151822; border: 1px solid rgba(255,255,255,0.08);">
+  <div>
+    <h4 class="fw-bold text-white mb-1"><%= show.movie.title %></h4>
+    <div class="d-flex align-items-center gap-2 text-muted small">
+      <span class="text-white"><%= show.theatre.name %>: <%= show.screen %></span>
+      <span>•</span>
+      <span class="text-danger fw-bold"><%= show.showTime %></span>
+      <span>•</span>
+      <span><%= new Date(show.showDate).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) %></span>
+      <span class="badge bg-secondary ms-1"><%= show.format %></span>
+    </div>
+  </div>
+  <div>
+    <a href="/shows/movie/<%= show.movie._id %>" class="btn btn-outline-secondary btn-sm">
+      <i class="fa-solid fa-xmark me-1"></i>Change Showtime
+    </a>
+  </div>
+</div>
+
+<!-- Seat Legend -->
+<div class="d-flex align-items-center justify-content-center gap-4 py-2 mb-2 text-muted small flex-wrap">
+  <div class="d-flex align-items-center gap-2">
+    <div class="seat-cell" style="cursor: default;"></div>
+    <span>Available</span>
+  </div>
+  <div class="d-flex align-items-center gap-2">
+    <div class="seat-cell selected" style="cursor: default;"></div>
+    <span>Selected</span>
+  </div>
+  <div class="d-flex align-items-center gap-2">
+    <div class="seat-cell booked" style="cursor: default;">✕</div>
+    <span>Sold Out</span>
+  </div>
+</div>
+
+<!-- Interactive Auditorium Matrix -->
+<div class="seat-auditorium">
+  <!-- Screen Curved Indicator -->
+  <div class="screen-indicator">
+    <div class="screen-curve"></div>
+    <div class="screen-text">All eyes this way please</div>
+  </div>
+
+  <!-- Rows Rendering -->
+  <div class="d-flex flex-column align-items-center">
+    <% 
+      let lastCategory = ""; 
+      seatRows.forEach(rowConfig => { 
+        if (rowConfig.category !== lastCategory) { 
+          lastCategory = rowConfig.category;
+    %>
+          <div class="seat-category-header">
+            <span><%= rowConfig.category %> — ₹<%= rowConfig.price %></span>
+          </div>
+    <%  } %>
+
+      <div class="seat-row">
+        <div class="seat-row-label"><%= rowConfig.rowLetter %></div>
+
+        <div class="d-flex gap-2">
+          <% for (let seatNum = 1; seatNum <= rowConfig.totalSeats; seatNum++) { 
+               const seatId = `${rowConfig.rowLetter}${seatNum}`;
+               const isBooked = bookedSeats.includes(seatId);
+          %>
+            <!-- Aisle gap in middle -->
+            <% if (seatNum === Math.floor(rowConfig.totalSeats / 2) + 1) { %>
+              <div style="width: 24px;"></div>
+            <% } %>
+
+            <div class="seat-cell <%= isBooked ? 'booked' : '' %>"
+                 data-seat-id="<%= seatId %>"
+                 data-category="<%= rowConfig.category %>"
+                 data-price="<%= rowConfig.price %>"
+                 title="<%= seatId %> (<%= rowConfig.category %> - ₹<%= rowConfig.price %>)">
+              <%= isBooked ? '✕' : seatNum %>
+            </div>
+          <% } %>
+        </div>
+
+        <div class="seat-row-label"><%= rowConfig.rowLetter %></div>
+      </div>
+    <% }); %>
+  </div>
+</div>
+
+<!-- Snacks & F&B Add-On Section -->
+<div class="card bg-dark border-secondary rounded-4 p-4 my-4 shadow-sm">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+      <h5 class="fw-bold text-white mb-1"><i class="fa-solid fa-popcorn text-warning me-2"></i>Grab a Bite! (Optional)</h5>
+      <p class="text-muted small mb-0">Pre-book freshly made cinema snacks and skip the concession lines.</p>
+    </div>
+    <span class="badge bg-warning text-dark fw-bold">Up to 20% Off Combos</span>
+  </div>
+
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-3">
+    <% snacksMenu.forEach(item => { %>
+      <div class="col">
+        <div class="snack-item-card p-3 rounded-3 d-flex align-items-center justify-content-between" 
+             data-snack-id="<%= item.id %>"
+             data-name="<%= item.name %>"
+             data-price="<%= item.price %>"
+             style="background: #1A1D27; border: 1px solid rgba(255,255,255,0.06);">
+          <div class="d-flex align-items-center gap-3">
+            <span style="font-size: 2rem;"><%= item.image %></span>
+            <div>
+              <h6 class="text-white fw-bold mb-0 small"><%= item.name %></h6>
+              <span class="text-danger fw-bold small">₹<%= item.price %></span>
+            </div>
+          </div>
+          <!-- Counter Controls -->
+          <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary snack-minus px-2 py-0">-</button>
+            <span class="text-white fw-bold snack-qty">0</span>
+            <button type="button" class="btn btn-sm btn-outline-danger snack-plus px-2 py-0">+</button>
+          </div>
+        </div>
+      </div>
+    <% }); %>
+  </div>
+</div>
+
+<!-- Floating Bottom Checkout & Price Summary Bar -->
+<div class="card bg-dark border-secondary rounded-4 p-4 shadow-lg sticky-bottom" style="bottom: 20px; z-index: 1000; background: rgba(18, 21, 30, 0.95) !important; backdrop-filter: blur(16px);">
+  <form id="seatCheckoutForm" action="/bookings/checkout" method="POST">
+    <!-- Hidden Inputs dynamically populated by script -->
+    <input type="hidden" name="showId" value="<%= show._id %>">
+    <input type="hidden" name="selectedSeats" id="selectedSeatsInput" value="">
+    <input type="hidden" name="seatCategory" id="seatCategoryInput" value="Prime">
+    <input type="hidden" name="selectedSnacks" id="selectedSnacksInput" value="{}">
+
+    <div class="row align-items-center g-3">
+      <!-- Seats Selection Display -->
+      <div class="col-md-4">
+        <span class="text-muted small d-block">Selected Seats:</span>
+        <span class="h5 fw-bold text-danger mb-0" id="summarySeatsList">None selected</span>
+      </div>
+
+      <!-- Cost Breakdown -->
+      <div class="col-md-5">
+        <div class="d-flex align-items-center justify-content-between text-muted small border-end pe-md-4">
+          <div>Tickets: <strong class="text-white" id="summaryTicketPrice">₹0</strong></div>
+          <div>Snacks: <strong class="text-white" id="summarySnacksPrice">₹0</strong></div>
+          <div>Fee & GST: <strong class="text-white" id="summaryConvenienceFee">₹0</strong></div>
+          <div class="fs-5 text-white">Total: <strong class="text-success" id="summaryGrandTotal">₹0</strong></div>
+        </div>
+      </div>
+
+      <!-- Submit Action -->
+      <div class="col-md-3 text-end">
+        <button type="submit" id="checkoutBtn" class="btn btn-bms w-100 py-3 fs-6" disabled>
+          Select Seats to Proceed
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- Load Seat Selection Script -->
+<script src="/js/seat-selection.js"></script>

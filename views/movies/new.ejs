@@ -1,0 +1,100 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="row justify-content-center my-4">
+  <div class="col-lg-8">
+    <div class="bms-auth-card">
+      <h2 class="fw-bold text-white mb-4"><i class="fa-solid fa-film text-danger me-2"></i>Add New Movie</h2>
+      <form action="/movies" method="POST" enctype="multipart/form-data">
+        <div class="row g-3">
+          <!-- Title -->
+          <div class="col-md-8">
+            <label class="form-label text-white fw-bold">Movie Title *</label>
+            <input type="text" name="movie[title]" class="form-control form-control-bms" placeholder="e.g. Dune: Part Two" required>
+          </div>
+          <!-- Certificate -->
+          <div class="col-md-4">
+            <label class="form-label text-white fw-bold">Certificate</label>
+            <select name="movie[certificate]" class="form-select form-control-bms">
+              <option value="U">U (Universal)</option>
+              <option value="UA" selected>UA (Parental Guidance)</option>
+              <option value="UA 16+">UA 16+</option>
+              <option value="A">A (Adults Only)</option>
+            </select>
+          </div>
+
+          <!-- Synopsis -->
+          <div class="col-12">
+            <label class="form-label text-white fw-bold">Synopsis / Storyline *</label>
+            <textarea name="movie[synopsis]" rows="3" class="form-control form-control-bms" placeholder="Compelling description of the film..." required></textarea>
+          </div>
+
+          <!-- Duration & Rating -->
+          <div class="col-md-6">
+            <label class="form-label text-white fw-bold">Duration (in minutes) *</label>
+            <input type="number" name="movie[duration]" class="form-control form-control-bms" placeholder="e.g. 166" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label text-white fw-bold">Initial Rating (out of 10)</label>
+            <input type="number" step="0.1" name="movie[rating]" class="form-control form-control-bms" placeholder="8.5" value="8.5">
+          </div>
+
+          <!-- Genres & Languages (Comma separated) -->
+          <div class="col-md-6">
+            <label class="form-label text-white fw-bold">Genres (comma-separated) *</label>
+            <input type="text" name="movie[genre]" class="form-control form-control-bms" placeholder="Action, Sci-Fi, Adventure" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label text-white fw-bold">Languages (comma-separated) *</label>
+            <input type="text" name="movie[language]" class="form-control form-control-bms" placeholder="English, Hindi, Telugu" required>
+          </div>
+
+          <!-- Formats (Comma separated) -->
+          <div class="col-md-6">
+            <label class="form-label text-white fw-bold">Formats (comma-separated)</label>
+            <input type="text" name="movie[format]" class="form-control form-control-bms" placeholder="2D, 3D, IMAX 3D, 4DX" value="2D, IMAX 3D">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label text-white fw-bold">Director</label>
+            <input type="text" name="movie[director]" class="form-control form-control-bms" placeholder="e.g. Denis Villeneuve" value="Christopher Nolan">
+          </div>
+
+          <!-- Trailer URL -->
+          <div class="col-12">
+            <label class="form-label text-white fw-bold">Trailer Embed URL (YouTube Embed)</label>
+            <input type="url" name="movie[trailerUrl]" class="form-control form-control-bms" placeholder="https://www.youtube.com/embed/Way9Dexny3w">
+          </div>
+
+          <!-- Poster Image (Upload or URL) -->
+          <div class="col-md-6">
+            <label class="form-label text-white fw-bold">Poster Image File</label>
+            <input type="file" name="poster" class="form-control form-control-bms">
+            <small class="text-muted">Or enter URL below</small>
+            <input type="url" name="movie[posterUrl]" class="form-control form-control-bms mt-1" placeholder="https://...poster.jpg">
+          </div>
+
+          <!-- Backdrop Banner Image -->
+          <div class="col-md-6">
+            <label class="form-label text-white fw-bold">Backdrop Banner File</label>
+            <input type="file" name="backdrop" class="form-control form-control-bms">
+            <small class="text-muted">Or enter URL below</small>
+            <input type="url" name="movie[backdropUrl]" class="form-control form-control-bms mt-1" placeholder="https://...backdrop.jpg">
+          </div>
+
+          <!-- Trending Switch -->
+          <div class="col-12">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" name="movie[isTrending]" id="isTrendingSwitch" value="true" checked>
+              <label class="form-check-label text-white" for="isTrendingSwitch">Feature in Top Trending Banner Carousel</label>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="col-12 mt-4 d-flex justify-content-end gap-3">
+            <a href="/movies" class="btn btn-bms-dark">Cancel</a>
+            <button type="submit" class="btn btn-bms px-4">Publish Movie</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

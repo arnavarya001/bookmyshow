@@ -1,0 +1,107 @@
+<% layout("/layouts/boilerplate") %>
+
+<!-- Header -->
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+  <div>
+    <h2 class="fw-bold text-white mb-1"><i class="fa-solid fa-building-columns text-danger me-2"></i>Cinemas & Theatres</h2>
+    <p class="text-muted small mb-0">Browse top multiplexes and cinema screens in <%= selectedCity %></p>
+  </div>
+
+  <!-- City Filter Pills -->
+  <div class="bms-filter-scroll">
+    <% cities.forEach(c => { %>
+      <a href="/theatres?city=<%= c %>" class="bms-filter-pill <%= selectedCity === c ? 'active' : '' %>">
+        <%= c %>
+      </a>
+    <% }); %>
+  </div>
+</div>
+
+<!-- Leaflet Map Container -->
+<div class="rounded-4 overflow-hidden mb-5 border border-secondary shadow-lg" style="height: 340px; position: relative;">
+  <div id="theatreMap" style="width: 100%; height: 100%;"></div>
+</div>
+
+<!-- Theatres Grid -->
+<% if (theatres && theatres.length > 0) { %>
+  <div class="row row-cols-1 row-cols-md-2 g-4 mb-5">
+    <% theatres.forEach(t => { %>
+      <div class="col">
+        <div class="p-4 rounded-4 h-100 d-flex flex-column justify-content-between" style="background: #141722; border: 1px solid rgba(255,255,255,0.08);">
+          <div>
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <span class="badge bg-danger text-uppercase"><%= t.chain %></span>
+              <span class="text-muted small"><i class="fa-solid fa-location-dot text-danger me-1"></i><%= t.city %></span>
+            </div>
+            <h4 class="fw-bold text-white mb-2"><%= t.name %></h4>
+            <p class="text-muted small mb-3"><%= t.address %></p>
+
+            <div class="d-flex flex-wrap gap-2 mb-4">
+              <% t.amenities.forEach(a => { %>
+                <span class="badge bg-secondary bg-opacity-25 border border-secondary text-white-50" style="font-size: 0.75rem;">
+                  <%= a %>
+                </span>
+              <% }); %>
+            </div>
+          </div>
+
+          <div class="d-flex align-items-center justify-content-between pt-3 border-top border-secondary">
+            <span class="text-success small"><i class="fa-solid fa-circle-check me-1"></i>M-Ticket & F&B Available</span>
+            <a href="/theatres/<%= t._id %>" class="btn btn-bms btn-sm px-3">
+              View Shows <i class="fa-solid fa-arrow-right ms-1"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    <% }); %>
+  </div>
+<% } else { %>
+  <div class="text-center py-5 my-5 rounded-4 p-5" style="background: #141722; border: 1px dashed rgba(255,255,255,0.1);">
+    <i class="fa-solid fa-film text-muted fs-1 mb-3"></i>
+    <h4 class="text-white">No theatres found in <%= selectedCity %></h4>
+    <p class="text-muted">Please choose another city to explore active cinemas.</p>
+  </div>
+<% } %>
+
+<!-- Leaflet Map Initialization Script -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const theatresData = <%- JSON.stringify(theatres) %>;
+    
+    // Default center to Mumbai or first theatre's coordinates
+    let defaultLat = 19.0760;
+    let defaultLng = 72.8777;
+
+    if (theatresData.length > 0 && theatresData[0].location && theatresData[0].location.coordinates) {
+      defaultLng = theatresData[0].location.coordinates[0];
+      defaultLat = theatresData[0].location.coordinates[1];
+    }
+
+    const map = L.map('theatreMap').setView([defaultLat, defaultLng], 12);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+      subdomains: 'abcd',
+      maxZoom: 19
+    }).addTo(map);
+
+    theatresData.forEach(t => {
+      if (t.location && t.location.coordinates) {
+        const lng = t.location.coordinates[0];
+        const lat = t.location.coordinates[1];
+        
+        const popupContent = `
+          <div style="color: #111; font-family: sans-serif;">
+            <strong style="font-size: 14px;">${t.name}</strong><br>
+            <small style="color: #666;">${t.address}</small><br>
+            <a href="/theatres/${t._id}" style="color: #F84464; font-weight: bold; text-decoration: none; font-size: 12px; margin-top: 5px; display: inline-block;">View Schedules &rarr;</a>
+          </div>
+        `;
+
+        L.marker([lat, lng])
+          .addTo(map)
+          .bindPopup(popupContent);
+      }
+    });
+  });
+</script>

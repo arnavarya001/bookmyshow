@@ -1,212 +1,115 @@
-<style>
-.search-wrapper form {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
+<header class="bms-navbar">
+  <div class="container d-flex align-items-center justify-content-between">
+    <!-- Brand Logo -->
+    <a href="/movies" class="bms-brand">
+      <div class="bms-brand-icon">
+        <i class="fa-solid fa-film"></i>
+      </div>
+      <div>book<span>my</span>show</div>
+    </a>
 
-.search-wrapper .form-control {
-  border-radius: 50px;
-  border: 1px solid #ddd;
-  padding: 8px 16px;
-  width: 100%;
-}
-
-.btn-search {
-  background-color: #fe424d;
-  color: #fff;
-  border-radius: 50px;
-  padding: 8px 16px;
-  border: none;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
-}
-
-.navbar-brand img {
-  height: 40px;
-}
-
-body.dark-mode .navbar-brand img {
-  filter: brightness(0) invert(1);
-}
-
-body.dark-mode #suggestionBox,
-body.dark-mode #suggestionBoxMobile {
-  background: #2a2a2a;
-  border-color: #444;
-}
-
-body.dark-mode #suggestionBox li,
-body.dark-mode #suggestionBoxMobile li {
-  color: #e0e0e0;
-}
-
-.add-property-btn {
-  background: linear-gradient(135deg, #fe424d, #ff6b6b);
-  color: white !important;
-  border-radius: 50px;
-  padding: 6px 16px !important;
-  font-weight: 600;
-  transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 4px 12px rgba(254,66,77,0.3);
-}
-
-.add-property-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(254,66,77,0.4);
-  color: white !important;
-}
-
-.user-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: #fff0f0;
-  border-radius: 50px;
-  padding: 5px 14px;
-  font-size: 0.875rem;
-  color: #fe424d;
-  font-weight: 700;
-}
-
-body.dark-mode .user-badge {
-  background: #2a1a1a;
-}
-</style>
-
-<nav class="navbar navbar-expand-md bg-body-tertiary border-bottom sticky-top">
-  <div class="container-fluid d-flex align-items-center">
-
-    <!-- LEFT — LOGO + EXPLORE -->
-    <div class="d-flex align-items-center gap-3">
-      <a class="navbar-brand d-flex align-items-center" href="/listings">
-        <img src="/logo.png" alt="logo" class="me-2">
-      </a>
-      <a class="nav-link d-none d-md-block" href="/listings">Explore</a>
-    </div>
-
-    <!-- CENTER — SEARCH (Desktop) -->
-    <% const hiddenRoutes = ["/login", "/signup"]; %>
-    <% if(!hiddenRoutes.includes(currentPath)){ %>
-    <div class="search-wrapper d-none d-md-flex flex-grow-1 justify-content-center px-3">
-      <form action="/listings/search" method="GET" class="d-flex gap-2 w-100" style="max-width: 400px;">
-        <div style="position: relative; width: 100%;">
-          <input
-            class="form-control"
-            type="search"
-            name="q"
-            id="searchInput"
-            placeholder="Search destinations"
-            autocomplete="off"
-          />
-          <ul id="suggestionBox" style="
-            display: none;
-            position: absolute;
-            top: 110%;
-            left: 0;
-            width: 100%;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 12px;
-            list-style: none;
-            padding: 6px 0;
-            margin: 0;
-            z-index: 9999;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-          "></ul>
-        </div>
-        <button class="btn btn-search" type="submit">
-          <i class="fa-solid fa-magnifying-glass"></i>
-          Search
-        </button>
+    <!-- Live Search Input -->
+    <div class="bms-search-container d-none d-md-block">
+      <form action="/movies/search" method="GET" class="position-relative">
+        <i class="fa-solid fa-magnifying-glass bms-search-icon"></i>
+        <input 
+          type="text" 
+          name="q" 
+          id="bmsSearchInput" 
+          class="bms-search-input" 
+          placeholder="Search for Movies, Events, Plays & Cinemas..." 
+          autocomplete="off"
+        >
+        <!-- Dynamic Autocomplete Results -->
+        <div id="bmsSuggestionDropdown" class="bms-autocomplete-dropdown"></div>
       </form>
     </div>
-    <% } %>
 
-    <!-- TOGGLE (Mobile) -->
-    <button class="navbar-toggler ms-auto" type="button"
-      data-bs-toggle="collapse"
-      data-bs-target="#navbarNavAltMarkup">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <!-- RIGHT — NAV LINKS -->
-    <div class="collapse navbar-collapse flex-grow-0" id="navbarNavAltMarkup">
-      <div class="navbar-nav align-items-md-center gap-1">
-
-        <% if(!currUser){ %>
-          <a class="nav-link" href="/signup"><b>Sign up</b></a>
-          <a class="nav-link" href="/login"><b>Log in</b></a>
-        <% } %>
-
-        <% if(currUser){ %>
-          <span class="user-badge">
-            <i class="fa-solid fa-circle-user"></i>
-            <%= currUser.username %>
-          </span>
-
-          <a class="nav-link add-property-btn"
-             href="/listings/new"
-             data-bs-toggle="tooltip"
-             data-bs-placement="bottom"
-             title="📸 Click to add photos & details of your property!">
-            <i class="fa-solid fa-plus"></i> Add Property
-          </a>
-
-          <a class="nav-link" href="/bookings/history">
-            <i class="fa-solid fa-calendar-check"></i> My Bookings
-          </a>
-          <a class="nav-link" href="/wishlist">
-            <i class="fa-solid fa-heart" style="color:#fe424d;"></i> Wishlist
-          </a>
-          <a class="nav-link" href="/logout"><b>Log out</b></a>
-        <% } %>
-
-        <!-- Dark Mode Toggle -->
-        <button id="darkModeToggle" class="nav-link border-0 bg-transparent">
-          <i class="fa-solid fa-moon"></i>
-        </button>
-
-        <!-- Mobile Search -->
-        <% if(!hiddenRoutes.includes(currentPath)){ %>
-        <div class="d-md-none mt-2 mb-2">
-          <form action="/listings/search" method="GET" class="d-flex gap-2">
-            <div style="position: relative; width: 100%;">
-              <input
-                class="form-control"
-                type="search"
-                name="q"
-                id="searchInputMobile"
-                placeholder="Search destinations"
-                autocomplete="off"
-              />
-              <ul id="suggestionBoxMobile" style="
-                display: none;
-                position: absolute;
-                top: 110%;
-                left: 0;
-                width: 100%;
-                background: white;
-                border: 1px solid #ddd;
-                border-radius: 12px;
-                list-style: none;
-                padding: 6px 0;
-                margin: 0;
-                z-index: 9999;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-              "></ul>
-            </div>
-            <button class="btn btn-search" type="submit">
-              <i class="fa-solid fa-magnifying-glass"></i>
-            </button>
-          </form>
-        </div>
-        <% } %>
-
+    <!-- Right Controls -->
+    <div class="d-flex align-items-center gap-3">
+      <!-- City Selection Pill -->
+      <div class="bms-city-pill" id="citySelectorPill" title="Change Location">
+        <i class="fa-solid fa-location-dot text-danger"></i>
+        <span><%= typeof selectedCity !== 'undefined' ? selectedCity : 'Mumbai' %></span>
+        <i class="fa-solid fa-chevron-down small text-muted"></i>
       </div>
-    </div>
 
+      <!-- User Auth State -->
+      <% if (!currUser) { %>
+        <a href="/login" class="btn btn-bms-outline btn-sm">Sign In</a>
+        <a href="/signup" class="btn btn-bms btn-sm d-none d-sm-inline-flex">Sign Up</a>
+      <% } else { %>
+        <div class="dropdown">
+          <button class="btn btn-bms-dark btn-sm dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <img src="<%= currUser.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80' %>" 
+                 alt="Avatar" 
+                 class="rounded-circle" 
+                 style="width: 24px; height: 24px; object-fit: cover;">
+            <span><%= currUser.username %></span>
+            <% if (currUser.role === 'admin') { %>
+              <span class="badge bg-danger rounded-pill" style="font-size: 0.65rem;">ADMIN</span>
+            <% } %>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark" style="background: #181C26; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 0.5rem;">
+            <li>
+              <a class="dropdown-item py-2 d-flex align-items-center gap-2 rounded-2" href="/bookings/history">
+                <i class="fa-solid fa-ticket text-danger"></i> Your Tickets
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item py-2 d-flex align-items-center gap-2 rounded-2" href="/watchlist">
+                <i class="fa-solid fa-heart text-danger"></i> Watchlist
+              </a>
+            </li>
+            <% if (currUser.role === 'admin') { %>
+              <li><hr class="dropdown-divider border-secondary"></li>
+              <li>
+                <a class="dropdown-item py-2 d-flex align-items-center gap-2 rounded-2 text-warning" href="/movies/new">
+                  <i class="fa-solid fa-plus-circle"></i> Add New Movie
+                </a>
+              </li>
+            <% } %>
+            <li><hr class="dropdown-divider border-secondary"></li>
+            <li>
+              <a class="dropdown-item py-2 d-flex align-items-center gap-2 rounded-2 text-danger" href="/logout">
+                <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+              </a>
+            </li>
+          </ul>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</header>
+
+<!-- Secondary Navigation Links -->
+<nav class="bms-subnav d-none d-sm-block">
+  <div class="container d-flex justify-content-between align-items-center">
+    <ul class="bms-subnav-links">
+      <li>
+        <a href="/movies" class="bms-subnav-link <%= currentPath.startsWith('/movies') || currentPath === '/' ? 'active' : '' %>">
+          Movies
+        </a>
+      </li>
+      <li>
+        <a href="/theatres" class="bms-subnav-link <%= currentPath.startsWith('/theatres') ? 'active' : '' %>">
+          Cinemas
+        </a>
+      </li>
+      <li>
+        <a href="/watchlist" class="bms-subnav-link <%= currentPath.startsWith('/watchlist') ? 'active' : '' %>">
+          Watchlist
+        </a>
+      </li>
+      <li>
+        <a href="/bookings/history" class="bms-subnav-link <%= currentPath.startsWith('/bookings') ? 'active' : '' %>">
+          My Tickets
+        </a>
+      </li>
+    </ul>
+
+    <div class="text-muted small d-none d-lg-block">
+      <span class="text-danger fw-bold"><i class="fa-solid fa-bolt me-1"></i>Instant Booking:</span> Verified tickets & 100% money back guarantee
+    </div>
   </div>
 </nav>

@@ -11,92 +11,153 @@ const MongoStore = require("connect-mongo");
 const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
-const User = require("./models/user.js");
-const ExpressError = require("./utils/ExpressError.js");
 
-const listingsRouter = require("./routes/listing.js");
-const reviewRouter = require("./routes/review.js");
-const userRouter = require("./routes/user.js");
-const wishlistRouter = require("./routes/wishlist.js");
-const bookingRouter = require("./routes/booking.js");
-const authRoutes = require("./routes/auth");
+const User = require("./models/user");
+const ExpressError = require("./utils/ExpressError");
 
-//  DATABASE 
-mongoose.connect(process.env.ATLASDB_URL)
-  .then(() => console.log("connected to DB"))
-  .catch(err => console.log(err));
+// Route Handlers
+const movieRouter = require("./routes/movie");
+const reviewRouter = require("./routes/review");
+const theatreRouter = require("./routes/theatre");
+const showRouter = require("./routes/show");
+const bookingRouter = require("./routes/booking");
+const userRouter = require("./routes/user");
 
-// VIEW ENGINE 
+const fs = require("fs");
+
+// Database Connection with Serverless Caching
+const dbUrl = process.env.ATLASDB_URL || "mongodb://127.0.0.1:27017/bookmyshow";
+let cachedConnection = null;
+
+async function connectDB() {
+  if (cachedConnection && mongoose.connection.readyState >= 1) {
+    return cachedConnection;
+  }
+  try {
+    cachedConnection = await mongoose.connect(dbUrl, {
+      serverSelectionTimeoutMS: 5000,
+    });
+    console.log("Connected to BookMyShow Database 🎬");
+    return cachedConnection;
+  } catch (err) {
+    console.warn("MongoDB connection warning:", err.message);
+  }
+}
+connectDB();
+
+// View Engine
 app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views"));
+const viewsPath = fs.existsSync(path.join(__dirname, "views"))
+  ? path.join(__dirname, "views")
+  : path.join(process.cwd(), "views");
+app.set("views", viewsPath);
 app.engine("ejs", ejsMate);
 
-//  MIDDLEWARE 
-app.use(express.static(path.join(__dirname, "public")));
+// Middleware
+const publicPath = fs.existsSync(path.join(__dirname, "public"))
+  ? path.join(__dirname, "public")
+  : path.join(process.cwd(), "public");
+app.use(express.static(publicPath));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(methodOverride("_method"));
 
-// SESSION STORE 
-const store = MongoStore.create({
-  mongoUrl: process.env.ATLASDB_URL,
-  touchAfter: 24 * 3600,
-});
-
-store.on("error", (err) => {
-  console.log("SESSION STORE ERROR", err);
-});
-
-app.use(session({
-  store,
-  secret: process.env.SECRET,
+// Session Store
+const secret = process.env.SECRET || "bookmyshow_super_secret_session_key";
+const sessionConfig = {
+  secret,
   resave: false,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
     maxAge: 7 * 24 * 60 * 60 * 1000,
+  },
+};
+
+if (process.env.ATLASDB_URL || !process.env.VERCEL) {
+  try {
+    const store = MongoStore.create({
+      mongoUrl: dbUrl,
+      touchAfter: 24 * 3600,
+    });
+    store.on("error", (err) => {
+      console.log("SESSION STORE NOTICE:", err.message);
+    });
+    sessionConfig.store = store;
+  } catch (e) {
+    console.warn("Session store fallback to memory:", e.message);
   }
-}));
+}
+
+app.use(session(sessionConfig));
+
+// Ensure DB is connected for serverless requests
+app.use(async (req, res, next) => {
+  if (mongoose.connection.readyState < 1) {
+    await connectDB();
+  }
+  next();
+});
 
 app.use(flash());
 
-//  PASSPORT 
+// Passport Authentication
 app.use(passport.initialize());
 app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-//  LOCALS 
+// Global Locals Middleware
 app.use((req, res, next) => {
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
   res.locals.currUser = req.user;
   res.locals.currentPath = req.originalUrl.split("?")[0];
+  res.locals.selectedCity = req.session.currentCity || "Mumbai";
   next();
 });
 
-//  ROUTES 
-app.get("/", (req, res) => {
-  return res.redirect("/listings");
+// Set City Preference
+app.post("/api/set-city", (req, res) => {
+  const { city } = req.body;
+  if (city) {
+    req.session.currentCity = city;
+  }
+  return res.json({ success: true, city });
 });
 
-app.use("/listings/:id/reviews", reviewRouter);
-app.use("/listings", listingsRouter);
+// Root Route
+app.get("/", (req, res) => {
+  return res.redirect("/movies");
+});
+
+// Mount Routes
+app.use("/movies/:id/reviews", reviewRouter);
+app.use("/movies", movieRouter);
+app.use("/theatres", theatreRouter);
+app.use("/shows", showRouter);
 app.use("/bookings", bookingRouter);
-app.use("/wishlist", wishlistRouter);
-app.use("/api/auth", authRoutes);
 app.use("/", userRouter);
 
-//ERROR HANDLER 
-app.use((err, req, res, next) => {
-  if (res.headersSent) return next(err);
-  let { statusCode = 500, message = "Something went wrong!" } = err;
-  return res.status(statusCode).render("error.ejs", { message });
+// 404 Route
+app.all("{*path}", (req, res, next) => {
+  next(new ExpressError(404, "Page Not Found"));
 });
 
-//SERVER 
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
-  console.log(`server running on port ${PORT}`);
+// Global Error Handler
+app.use((err, req, res, next) => {
+  if (res.headersSent) return next(err);
+  const { statusCode = 500, message = "Something went wrong!" } = err;
+  return res.status(statusCode).render("error", { message });
 });
+
+// Start Server
+const PORT = process.env.PORT || 8080;
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`🍿 BookMyShow Server running smoothly at http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;

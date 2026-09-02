@@ -1,18 +1,10 @@
+const app = require("../app");
+
 module.exports = (req, res) => {
   try {
-    const app = require("../app");
-    return res.status(200).json({
-      status: "ok",
-      appType: typeof app,
-      views: app.get("views"),
-      cwd: process.cwd(),
-      dirname: __dirname,
-      hasAtlas: !!process.env.ATLASDB_URL,
-    });
+    return app(req, res);
   } catch (err) {
-    return res.status(500).json({
-      error: err.message,
-      stack: err.stack,
-    });
+    res.statusCode = 500;
+    return res.end(`Ping caught: ${err.message}\n${err.stack}`);
   }
 };

@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/*.js",
+      "src": "api/index.js",
       "use": "@vercel/node",
       "config": {
         "includeFiles": [
@@ -19,10 +19,6 @@
     }
   ],
   "routes": [
-    {
-      "src": "/api/ping",
-      "dest": "/api/ping.js"
-    },
     {
       "src": "/(.*)",
       "dest": "/api/index.js"

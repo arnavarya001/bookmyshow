@@ -30,7 +30,9 @@ mongoose.set("bufferCommands", false);
 mongoose.set("bufferTimeoutMS", 2000);
 
 const isProd = process.env.NODE_ENV === "production" || process.env.VERCEL;
-const dbUrl = process.env.ATLASDB_URL || (!isProd ? "mongodb://127.0.0.1:27017/bookmyshow" : null);
+const rawDbUrl = process.env.ATLASDB_URL;
+const isValidAtlasUrl = rawDbUrl && !rawDbUrl.includes("<") && !rawDbUrl.includes(">");
+const dbUrl = isValidAtlasUrl ? rawDbUrl : (!isProd ? "mongodb://127.0.0.1:27017/bookmyshow" : null);
 let cachedConnection = null;
 
 async function connectDB() {
@@ -84,10 +86,10 @@ const sessionConfig = {
   },
 };
 
-if (process.env.ATLASDB_URL) {
+if (isValidAtlasUrl) {
   try {
     const store = MongoStore.create({
-      mongoUrl: process.env.ATLASDB_URL,
+      mongoUrl: rawDbUrl,
       touchAfter: 24 * 3600,
     });
     store.on("error", (err) => {
